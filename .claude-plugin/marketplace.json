@@ -1,0 +1,20 @@
+{
+  "name": "devfellowship",
+  "plugins": [
+    {
+      "name": "subagent-driven-development",
+      "source": "skills/subagent-driven-development",
+      "description": "Use when executing implementation plans with independent tasks in the current session"
+    },
+    {
+      "name": "test-driven-development",
+      "source": "skills/test-driven-development",
+      "description": "Use when implementing any feature or bugfix, before writing implementation code"
+    },
+    {
+      "name": "web-design-guidelines",
+      "source": "skills/web-design-guidelines",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit "
+    }
+  ]
+}
