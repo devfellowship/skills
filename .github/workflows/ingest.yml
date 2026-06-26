@@ -1,0 +1,46 @@
+# Public repo: self-hosted dfl-runner blocked (allows_public=false). Authorized Tainan TG 2026-06-06.
+name: Skills ingest + audit
+
+on:
+  push:
+    branches: [main]
+    paths: ["skills/**", "scripts/ingest.ts"]
+  pull_request:
+    paths: ["skills/**", "scripts/ingest.ts"]
+
+jobs:
+  audit:
+    # On PRs: run the audit gate (DRY_RUN, AUDIT_BLOCK) — blocks merge on
+    # high-risk injection/secret findings (Q10=A). Override with the
+    # `skip-skill-audit` label.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Audit scan (gate)
+        env:
+          SKILLS_SOURCE: ${{ github.repository }}
+          SKILLS_VISIBILITY: public
+          DRY_RUN: "1"
+          AUDIT_BLOCK: ${{ contains(github.event.pull_request.labels.*.name, 'skip-skill-audit') && '0' || '1' }}
+        run: bun scripts/ingest.ts
+
+  ingest:
+    # On push to main: parse + embed + upsert into the registry.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Ingest into dfl-skills registry
+        env:
+          SKILLS_SOURCE: ${{ github.repository }}
+          SKILLS_VISIBILITY: public
+          SKILLS_INGEST_URL: ${{ vars.SKILLS_INGEST_URL }}
+          SKILLS_INGEST_SECRET: ${{ secrets.SKILLS_INGEST_SECRET }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: bun scripts/ingest.ts
