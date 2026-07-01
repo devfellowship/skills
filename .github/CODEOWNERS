@@ -1,0 +1,16 @@
+# Code owners for the public skills registry.
+# This is the hook for requiring a security-literate review: any PR touching a
+# skill, the ingest/audit tooling, or CI must be approved by an owner below.
+# Enforcement requires a branch-protection rule that "requires review from Code
+# Owners" — CODEOWNERS alone does not block merges (see PR description).
+
+# Skill content (the untrusted attack surface — anyone can PR a skill).
+/skills/**            @taigfs @SamuelStefano
+
+# Audit gate + generators. A weakness here disarms the whole defense.
+/scripts/**           @taigfs @SamuelStefano
+
+# CI / workflows / this file.
+/.github/**           @taigfs @SamuelStefano
+
+# TODO: add a dedicated TL / security team once one exists in the org.
