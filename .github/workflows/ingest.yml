@@ -4,21 +4,30 @@ name: Skills ingest + audit
 on:
   push:
     branches: [main]
-    paths: ["skills/**", "scripts/ingest.ts"]
+    paths: ["skills/**", "scripts/**", ".claude-plugin/marketplace.json"]
   pull_request:
-    paths: ["skills/**", "scripts/ingest.ts"]
+    paths: ["skills/**", "scripts/**", ".claude-plugin/marketplace.json"]
+
+# Least privilege: this workflow only reads the repo. The ingest POST uses a
+# bearer secret, not the GITHUB_TOKEN.
+permissions:
+  contents: read
 
 jobs:
   audit:
     # On PRs: run the audit gate (DRY_RUN, AUDIT_BLOCK) — blocks merge on
-    # high-risk injection/secret findings (Q10=A). Override with the
-    # `skip-skill-audit` label.
+    # high-risk injection/secret findings across ALL files in each skill folder
+    # (Q10=A). Override with the `skip-skill-audit` label (restrict who can add
+    # that label + require this check in branch protection — see CODEOWNERS).
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      # Actions SHA-pinned (supply-chain): resolve tag -> SHA before bumping.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
+      - name: Marketplace manifest is in sync
+        run: bun scripts/gen-marketplace.ts --check
       - name: Audit scan (gate)
         env:
           SKILLS_SOURCE: ${{ github.repository }}
@@ -28,12 +37,14 @@ jobs:
         run: bun scripts/ingest.ts
 
   ingest:
-    # On push to main: parse + embed + upsert into the registry.
+    # On push to main only (never fork PRs): parse + embed + upsert into the
+    # registry. Fork PRs run the `audit` job above but never reach this — the
+    # ingest secret is never exposed to untrusted PR code.
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
       - name: Ingest into dfl-skills registry
