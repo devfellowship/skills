@@ -27,13 +27,52 @@
  * adversary (reword, split, encode). The real defense is a security-literate
  * human review (see .github/CODEOWNERS) + a required status check on this gate.
  * Treat findings as "needs human eyes", not "provably safe if clean".
+ *
+ * ──────────────────────────────────────────────────────────────────────────
+ * SECURITY MODEL — read this before trusting the gate.
+ *
+ * The CONTENT audit below is BEST-EFFORT DEFENSE-IN-DEPTH, NOT A SECURITY
+ * BOUNDARY. A regex/keyword scanner is fundamentally bypassable: an adversary
+ * can reword the instruction in prose, split/encode it (base64 under the size
+ * threshold, hex, zero-width joiners, homoglyphs), or hide the payload in a
+ * sibling file that SKILL.md tells the agent to load at runtime. Do NOT read a
+ * clean audit as "safe". Its job is to raise the cost of the lazy attack and
+ * flag obvious-bad shapes for a human — nothing more.
+ *
+ * The STRUCTURAL checks (walker hardening: no symlink-follow, size/depth/count
+ * caps; filename bidi/RTLO scan; NFKC-normalized reserved-word check) are
+ * different in kind: they close no-false-positive gaps and are worth enforcing.
+ *
+ * REAL enforcement requires three org-admin settings this code CANNOT set:
+ *   (a) the `audit` job configured as a REQUIRED status check on the branch
+ *       ruleset (a red check is cosmetic if it doesn't block merge);
+ *   (b) `require_code_owner_review: true` so CODEOWNERS actually blocks merges
+ *       (present-but-unenforced today = inert);
+ *   (c) the `skip-skill-audit` label + `bypass_actors` restricted to a minimal
+ *       trusted set (a broad bypass team defeats the gate).
+ *
+ * FUTURE (not implemented here): an LLM-based semantic review step would give
+ * real detection quality — it can reason about intent that a regex cannot.
+ * See README.md "## Security model".
+ * ──────────────────────────────────────────────────────────────────────────
  */
 
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const SKILLS_DIR = "skills";
+
+/** Walker safety caps — this runs on a CI runner; unbounded recursion / file
+ * size is a DoS primitive, and following symlinks is a traversal primitive. */
+const MAX_FILE_BYTES = 1_000_000; // skip (don't read into memory) files > 1 MB
+const MAX_DEPTH = 12; // max directory recursion depth
+const MAX_FILES = 2000; // hard cap on total files walked before aborting
+
+/** Bidi / RTL override control chars (LRE/RLE/PDF/LRO/RLO + isolates).
+ * In a FILENAME these disguise `evil<RLO>gpj.exe` as `evilexe.jpg`; the content
+ * regex never sees the path, so names are scanned separately. */
+const BIDI_CONTROL_RE = /[‪-‮⁦-⁩]/;
 
 /** Skill names that must never be claimed (impersonation / shadowing). */
 const RESERVED_NAMES = new Set(["admin", "system", "claude", "anthropic"]);
@@ -197,21 +236,111 @@ function auditText(content: string, file: string): Finding[] {
 	return findings;
 }
 
-/** Recursively list every file under a directory. */
-function walkFiles(dir: string): string[] {
-	const files: string[] = [];
-	for (const entry of readdirSync(dir)) {
+interface WalkResult {
+	/** Regular files to audit (size-capped, symlinks excluded). */
+	files: string[];
+	/** Structural findings raised during the walk (oversized, bidi filenames). */
+	findings: Finding[];
+}
+
+/**
+ * Recursively list every regular file under a directory, with CI-runner
+ * hardening:
+ *   - lstatSync (not statSync) + skip symlinks entirely — never follow a link
+ *     (a link to /etc/passwd or a cycle would otherwise be read/recursed).
+ *   - per-file size cap: files > MAX_FILE_BYTES are skipped (never read into
+ *     memory) and noted as a finding.
+ *   - depth cap (MAX_DEPTH) and total file-count cap (MAX_FILES): exceeding the
+ *     count aborts with a clear error (DoS guard).
+ * Also scans each entry NAME for bidi/RTLO control chars (path basenames never
+ * reach the content scanner).
+ */
+function walkFiles(dir: string, depth = 0, acc?: WalkResult): WalkResult {
+	const out: WalkResult = acc ?? { files: [], findings: [] };
+	if (depth > MAX_DEPTH) {
+		out.findings.push({ label: `walk-max-depth-exceeded(${MAX_DEPTH})`, file: dir });
+		return out;
+	}
+	let entries: string[];
+	try {
+		entries = readdirSync(dir);
+	} catch {
+		return out;
+	}
+	for (const entry of entries) {
 		const full = join(dir, entry);
-		let s: ReturnType<typeof statSync>;
+		if (BIDI_CONTROL_RE.test(entry)) {
+			out.findings.push({ label: "bidi-override-filename", file: full });
+		}
+		let s: ReturnType<typeof lstatSync>;
 		try {
-			s = statSync(full);
+			s = lstatSync(full);
 		} catch {
 			continue;
 		}
-		if (s.isDirectory()) files.push(...walkFiles(full));
-		else if (s.isFile()) files.push(full);
+		// Skip symlinks entirely — do not follow (traversal / cycle guard).
+		if (s.isSymbolicLink()) {
+			console.error(`AUDIT walk: skipping symlink (not followed) [${full}]`);
+			continue;
+		}
+		if (s.isDirectory()) {
+			walkFiles(full, depth + 1, out);
+		} else if (s.isFile()) {
+			if (s.size > MAX_FILE_BYTES) {
+				console.error(
+					`AUDIT walk: skipping oversized file ${s.size}B > ${MAX_FILE_BYTES}B (not read) [${full}]`,
+				);
+				out.findings.push({ label: `oversized-file(${s.size}B)`, file: full });
+				continue;
+			}
+			out.files.push(full);
+			if (out.files.length > MAX_FILES) {
+				console.error(`AUDIT walk: file-count cap ${MAX_FILES} exceeded — aborting`);
+				process.exit(2);
+			}
+		}
 	}
-	return files;
+	return out;
+}
+
+/**
+ * Homoglyph → ASCII-lookalike map for the confusable "skeleton". NFKC does NOT
+ * fold cross-script lookalikes (Cyrillic `а` U+0430 stays distinct from Latin
+ * `a`), so a pure-Cyrillic `аdmin` would sail past a plain NFKC + Set check.
+ * We fold the handful of Cyrillic/Greek letters that impersonate the ASCII
+ * letters used by the reserved words, so the skeleton of `аdmin` becomes
+ * `admin`. Scoped to these letters only → no false positives on legit names.
+ */
+const CONFUSABLES: Record<string, string> = {
+	а: "a", // U+0430 CYRILLIC A
+	е: "e", // U+0435 CYRILLIC IE
+	о: "o", // U+043E CYRILLIC O
+	с: "c", // U+0441 CYRILLIC ES
+	ѕ: "s", // U+0455 CYRILLIC DZE
+	і: "i", // U+0456 CYRILLIC I
+	т: "t", // U+0442 (visually similar in some faces)
+	у: "y", // U+0443 CYRILLIC U
+	м: "m", // U+043C CYRILLIC EM
+	н: "h", // U+043D CYRILLIC EN
+	α: "a", // U+03B1 GREEK ALPHA
+	ε: "e", // U+03B5 GREEK EPSILON
+	ο: "o", // U+03BF GREEK OMICRON
+	ι: "i", // U+03B9 GREEK IOTA
+	ѵ: "v", // U+0475
+};
+
+/**
+ * Normalize an identifier for reserved-word comparison: Unicode NFKC (collapses
+ * compatibility forms — fullwidth, ligatures), trim (so `"admin "` with a
+ * trailing space can't slip past), lowercase.
+ */
+function normalizeName(s: string): string {
+	return s.normalize("NFKC").trim().toLowerCase();
+}
+
+/** Fold known homoglyphs to their ASCII lookalike to expose impersonation. */
+function confusableSkeleton(s: string): string {
+	return [...s].map((ch) => CONFUSABLES[ch] ?? ch).join("");
 }
 
 /** Audit metadata-level issues (name↔slug, reserved words). */
@@ -221,9 +350,29 @@ function auditMetadata(slug: string, fm: Frontmatter): Finding[] {
 	if (fm.name && fm.name !== slug) {
 		findings.push({ label: `name-slug-mismatch(${fm.name}!=${slug})`, file: skillMd });
 	}
-	const nameForReserved = String(fm.name ?? slug).toLowerCase();
-	if (RESERVED_NAMES.has(nameForReserved)) {
-		findings.push({ label: `reserved-name(${nameForReserved})`, file: skillMd });
+	const rawName = String(fm.name ?? slug);
+	const normalized = normalizeName(rawName);
+	// Also test the homoglyph-folded skeleton so Cyrillic/Greek lookalikes
+	// (`аdmin`, `systеm`) collapse onto their ASCII reserved word. Distinct forms
+	// are deduped, and an exact match takes precedence over a token match.
+	const forms = [...new Set([normalized, confusableSkeleton(normalized)])];
+	// Exact reserved match (catches `"admin "`, Cyrillic `аdmin`).
+	const exact = forms.find((f) => RESERVED_NAMES.has(f));
+	if (exact) {
+		findings.push({ label: `reserved-name(${exact})`, file: skillMd });
+	} else {
+		// Impersonation via a reserved token embedded in the name
+		// (e.g. `claude-helper`, `admin-utils`, `system.tools`): split on the
+		// usual delimiters and flag any token that is a reserved word.
+		const seen = new Set<string>();
+		for (const form of forms) {
+			for (const t of form.split(/[-_.]/).filter(Boolean)) {
+				if (RESERVED_NAMES.has(t) && !seen.has(t)) {
+					seen.add(t);
+					findings.push({ label: `reserved-token(${t} in ${form})`, file: skillMd });
+				}
+			}
+		}
 	}
 	return findings;
 }
@@ -289,7 +438,9 @@ function main() {
 		// plus metadata-level checks. Only SKILL.md is ingested/embedded below,
 		// but the whole folder ships with the skill and can be loaded at runtime.
 		const findings: Finding[] = [];
-		for (const file of walkFiles(dir)) {
+		const walked = walkFiles(dir);
+		findings.push(...walked.findings);
+		for (const file of walked.files) {
 			let text: string;
 			try {
 				text = readFileSync(file, "utf8");
