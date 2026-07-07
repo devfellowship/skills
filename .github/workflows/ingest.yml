@@ -7,6 +7,7 @@ on:
     paths: ["skills/**", "scripts/ingest.ts"]
   pull_request:
     paths: ["skills/**", "scripts/ingest.ts"]
+  workflow_dispatch: {}
 
 jobs:
   audit:
@@ -28,8 +29,8 @@ jobs:
         run: bun scripts/ingest.ts
 
   ingest:
-    # On push to main: parse + embed + upsert into the registry.
-    if: github.event_name == 'push'
+    # On push to main (or manual re-trigger): parse + embed + upsert into the registry.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
