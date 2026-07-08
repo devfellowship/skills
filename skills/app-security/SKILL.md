@@ -1,6 +1,7 @@
 ---
 name: app-security
 description: Revisão de segurança OBRIGATÓRIA dos apps do Samuel. Use SEMPRE ao escrever ou revisar QUALQUER código que toque dados, auth ou rede — PR review, criação/migration de tabela SQL, RLS, edge functions/hooks, frontend, backend, JWT, env vars, CI/workflows, infra/deploy. Checklist por camada destilado de incidentes REAIS (PAT org-wide vazado no bundle via VITE_, RLS off em dados financeiros/PII, Postgres exposto na internet). AUTO-EVOLUI: toda vulnerabilidade nova vira entrada no Registro + nova regra de checklist. Complementa [[dfl-pr-learnings]], [[dfl-schema-migrations]], [[dfl-permissions]], [[dfl-db-simplicity]].
+author: SamuelStefano
 tags: [security, rls, auth, checklist]
 ---
 

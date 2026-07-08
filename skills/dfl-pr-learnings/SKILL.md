@@ -1,6 +1,7 @@
 ---
 name: dfl-pr-learnings
 description: Erros recorrentes que Claude comete em PRs do Samuel nos repos DFL e que o TL taigfs sempre aponta. Use SEMPRE antes de finalizar qualquer arquivo .tsx/.ts/.sql em repo DFL — vira checklist obrigatório de "será que o taigfs vai aprovar isso?". Cobre componentização, services layer, tipos gerados Supabase, schema design, e 5 erros BLOQUEANTES reincidentes (Seção 0). Complementa [[dfl-code-style]].
+author: SamuelStefano
 tags: [pr-review, code-review, conventions, checklist]
 ---
 

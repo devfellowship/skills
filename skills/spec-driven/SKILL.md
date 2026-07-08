@@ -1,6 +1,7 @@
 ---
 name: spec-driven
 description: Metodologia spec-driven development (SDD) pros projetos do Samuel. Use ANTES de codar qualquer feature não-trivial (>~meio dia, cross-file/cross-repo, ambígua, ou sensível a dinheiro/segurança). Força alinhar requisitos→design→tasks com gates de aprovação humana ANTES de escrever código, atacando a causa-raiz do retrabalho (PR volta com correção do TL por escopo/design errado). Specs ficam em `.sdd/<feature>/` (gitignored). Compõe com [[dfl-pr-learnings]], [[dfl-code-style]], [[dfl-permissions]], [[dfl-stack]] e [[squad-review]].
+author: SamuelStefano
 tags: [planning, spec, workflow, requirements]
 ---
 

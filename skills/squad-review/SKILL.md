@@ -1,6 +1,7 @@
 ---
 name: squad-review
 description: Workflow de deliberação multi-agente (squad de ~6) pra decisões caras de errar — arquitetura, planejamento cross-repo, design review, investigação ambígua. Roda em 2 fases (divergente → convergente) com papéis obrigatórios (red-team + orquestrador que VERIFICA fatos contra o código). Regra de ouro: fato se verifica, não se vota. Saída = decision record. Use quando o custo de errar > custo do squad; NÃO use pra tarefa rotineira. Compõe com [[spec-driven]] (red-team do design) e [[dfl-pr-learnings]].
+author: SamuelStefano
 tags: [multi-agent, review, architecture, decision-making]
 ---
 

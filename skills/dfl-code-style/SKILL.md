@@ -1,6 +1,7 @@
 ---
 name: dfl-code-style
 description: Modo de trabalho e regras de código do Samuel para todos os repos DevFellowship. Use SEMPRE que for escrever, refatorar ou revisar código TypeScript/React em qualquer repo DFL. Cobre componentização, atomic design, hooks, nomenclatura, organização de pastas, git workflow.
+author: SamuelStefano
 tags: [frontend, react, typescript, conventions]
 ---
 

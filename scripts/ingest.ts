@@ -28,6 +28,7 @@ interface Frontmatter {
 	name?: string;
 	description?: string;
 	kind?: string;
+	author?: string;
 	tags?: string[];
 	[k: string]: unknown;
 }
@@ -86,6 +87,7 @@ interface OutSkill {
 	content_sha256: string;
 	commit_sha?: string;
 	tags: string[];
+	author?: string;
 	body: string;
 }
 
@@ -143,6 +145,7 @@ function main() {
 			content_sha256: sha256(content),
 			commit_sha: process.env.GITHUB_SHA,
 			tags: fm.tags || [],
+			author: fm.author,
 			body,
 		});
 	}
