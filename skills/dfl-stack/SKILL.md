@@ -1,6 +1,7 @@
 ---
 name: dfl-stack
 description: Stack técnica padrão dos repos frontend DevFellowship — frameworks, libs, versões, ferramentas e o que NÃO introduzir. Use SEMPRE antes de adicionar dependências, configurar build, escolher lib nova ou inicializar repo novo no ecossistema DFL.
+author: SamuelStefano
 tags: [frontend, stack, dependencies, conventions]
 ---
 

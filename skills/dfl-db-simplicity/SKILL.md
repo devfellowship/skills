@@ -1,6 +1,7 @@
 ---
 name: dfl-db-simplicity
 description: Diretriz de manutenibilidade do TL (Tainan/taigfs, 2026-06-19) para o banco nos repos DFL — a especialização do time é app/TS, NÃO banco. Empurrar lógica pro TS (edge functions/API, que têm arquivos de teste), manter o banco FINO. Evitar ao máximo RLS complexa e funções plpgsql (SECURITY DEFINER, lógica em SQL). Use ANTES de decidir onde colocar lógica nova em qualquer feature que toque dfl-schema. Complementa [[dfl-pr-learnings]].
+author: SamuelStefano
 tags: [schema, database, postgres, architecture]
 ---
 

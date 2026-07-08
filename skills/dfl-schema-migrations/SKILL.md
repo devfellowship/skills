@@ -1,6 +1,7 @@
 ---
 name: dfl-schema-migrations
 description: Regras e correções recorrentes ao criar/editar migrations SQL no dfl-schema (qualquer .sql em supabase/migrations/). Use SEMPRE antes de finalizar ou abrir PR de migration — é o checklist obrigatório de "o Tainan/Samuel vão pedir correção disso?". Cobre o MÉTODO DE APLICAÇÃO (ledger por timestamp, duplicate-version=silent-skip, timestamp malformado, recorded-not-applied, human-gate de prod), SEGURANÇA/AUTZ (NUNCA GRANT write SECURITY DEFINER a anon com schema exposto no PostgREST — o gate do app é bypassável; gate por segredo DENTRO da função), dfl-db-simplicity (empurrar lógica pro TS testável, não plpgsql novo) e padrões de upsert/enum/trigger. AUTO-EVOLUI: cada correção de PR nova vira entrada no "Registro de correções". Complementa [[dfl-pr-learnings]] e [[dfl-db-simplicity]].
+author: SamuelStefano
 tags: [schema, database, postgres, migrations]
 ---
 
