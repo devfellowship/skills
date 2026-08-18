@@ -2,6 +2,11 @@
   "name": "devfellowship",
   "plugins": [
     {
+      "name": "storybook-design-pr",
+      "source": "skills/storybook-design-pr",
+      "description": "Use quando uma mudança visual virar Pull Request — designer ou agente alterando componente, protótipo ou story de Storybook. Garante que a PR carregue o porquê, o print antes/depois e o link do preview."
+    },
+    {
       "name": "subagent-driven-development",
       "source": "skills/subagent-driven-development",
       "description": "Use when executing implementation plans with independent tasks in the current session"
