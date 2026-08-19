@@ -1,7 +1,8 @@
 #!/usr/bin/env bun
 /**
- * ingest.ts — walk skills/<name>/SKILL.md, parse frontmatter, content-hash,
- * audit-scan, and POST the batch to the dfl-skills registry /ingest endpoint.
+ * ingest.ts — read the plugins declared in .claude-plugin/marketplace.json, parse
+ * each SKILL.md frontmatter, content-hash, audit-scan, and POST the batch to the
+ * dfl-skills registry /ingest endpoint.
  *
  * Plan 20260626-skills-marketplace, Fase 1. Run by the GitHub Action on push.
  *
@@ -16,6 +17,10 @@
  * Any finding marks the skill `audit_fail` and (with AUDIT_BLOCK=1) exits non-zero
  * so the CI blocks the merge (Q10 = A). The label-override is handled in the
  * workflow (skip this script's hard-fail when the override label is present).
+ *
+ * 🚨 DRIFT GATE: the manifest is the publisher. A folder nobody declared is never
+ * published, and a declaration with no folder fails — both directions are errors,
+ * so "it's on disk" can't silently become "it's on the public site".
  */
 
 import { createHash } from "node:crypto";
@@ -23,6 +28,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const SKILLS_DIR = "skills";
+const MANIFEST = ".claude-plugin/marketplace.json";
 
 interface Frontmatter {
 	name?: string;
@@ -73,6 +79,23 @@ function audit(content: string): string[] {
 	return findings;
 }
 
+/** Every file in the skill folder can end up as agent instructions, not just SKILL.md. */
+function auditDir(dir: string): string[] {
+	const findings: string[] = [];
+	for (const entry of readdirSync(dir, { recursive: true, withFileTypes: true })) {
+		if (!entry.isFile()) continue;
+		const path = join(entry.parentPath ?? dir, entry.name);
+		let content: string;
+		try {
+			content = readFileSync(path, "utf8");
+		} catch {
+			continue;
+		}
+		for (const label of audit(content)) findings.push(`${entry.name}:${label}`);
+	}
+	return findings;
+}
+
 function sha256(s: string): string {
 	return createHash("sha256").update(s).digest("hex");
 }
@@ -91,6 +114,48 @@ interface OutSkill {
 	body: string;
 }
 
+/** Slugs declared in the manifest, derived from each plugin's `source` path. */
+function readManifestSlugs(): string[] {
+	let raw: string;
+	try {
+		raw = readFileSync(MANIFEST, "utf8");
+	} catch {
+		console.error(`no ${MANIFEST}`);
+		process.exit(2);
+	}
+	const plugins = JSON.parse(raw).plugins;
+	if (!Array.isArray(plugins)) {
+		console.error(`${MANIFEST}: "plugins" must be an array`);
+		process.exit(2);
+	}
+	const slugs: string[] = [];
+	for (const p of plugins) {
+		const m = /^\.\/skills\/([^/]+)\/?$/.exec(String(p?.source ?? ""));
+		if (!m) {
+			console.error(`${MANIFEST}: plugin "${p?.name}" has no ./skills/<slug> source`);
+			process.exit(2);
+		}
+		slugs.push(m[1]);
+	}
+	return slugs;
+}
+
+function listSkillDirs(): string[] {
+	let entries: string[] = [];
+	try {
+		entries = readdirSync(SKILLS_DIR);
+	} catch {
+		return [];
+	}
+	return entries.filter((e) => {
+		try {
+			return statSync(join(SKILLS_DIR, e)).isDirectory();
+		} catch {
+			return false;
+		}
+	});
+}
+
 function main() {
 	const source = process.env.SKILLS_SOURCE;
 	const visibility = process.env.SKILLS_VISIBILITY;
@@ -101,36 +166,31 @@ function main() {
 		process.exit(2);
 	}
 
-	let entries: string[] = [];
-	try {
-		entries = readdirSync(SKILLS_DIR);
-	} catch {
-		console.error(`no ${SKILLS_DIR}/ dir`);
-		process.exit(2);
+	const declared = readManifestSlugs();
+	const onDisk = listSkillDirs();
+
+	const undeclared = onDisk.filter((s) => !declared.includes(s));
+	if (undeclared.length > 0) {
+		console.error(
+			`DRIFT: skills/ has undeclared ${undeclared.join(", ")} — add them to ${MANIFEST} or delete the folder`,
+		);
+		process.exit(1);
 	}
 
 	const out: OutSkill[] = [];
 	let auditFailures = 0;
 
-	for (const slug of entries) {
-		const dir = join(SKILLS_DIR, slug);
-		let isDir = false;
-		try {
-			isDir = statSync(dir).isDirectory();
-		} catch {
-			/* ignore */
-		}
-		if (!isDir) continue;
-		const skillMd = join(dir, "SKILL.md");
+	for (const slug of declared) {
+		const skillMd = join(SKILLS_DIR, slug, "SKILL.md");
 		let content: string;
 		try {
 			content = readFileSync(skillMd, "utf8");
 		} catch {
-			console.warn(`skip ${slug}: no SKILL.md`);
-			continue;
+			console.error(`DRIFT: ${MANIFEST} declares ${slug} but ${skillMd} is missing`);
+			process.exit(1);
 		}
 		const { fm, body } = parseFrontmatter(content);
-		const findings = audit(content);
+		const findings = auditDir(join(SKILLS_DIR, slug));
 		if (findings.length > 0) {
 			auditFailures++;
 			console.error(`AUDIT ${slug}: ${findings.join(", ")}`);

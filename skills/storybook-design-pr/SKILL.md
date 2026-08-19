@@ -1,6 +1,8 @@
 ---
 name: storybook-design-pr
-description: Use quando uma mudança visual virar Pull Request — designer ou agente alterando componente, protótipo ou story de Storybook. Garante que a PR carregue o porquê, o print antes/depois e o link do preview, para que a automação consiga gerar a task sem intervenção humana.
+description: Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz um corpo de PR com o porquê e o antes/depois. Não use em mudança só de lógica, sem efeito visual.
+author: devfellowship
+tags: [design, pull-request, storybook, handoff]
 ---
 
 # Mudança de design → Pull Request
@@ -26,17 +28,25 @@ ninguém depois de você consegue recuperá-lo a partir do diff.
 **Não usar** quando a mudança é só de lógica sem efeito visual — nesse caso a
 automação de design não dispara e o formato aqui é ruído.
 
-## O que acontece sozinho
+## O que a automação faz — quando está ligada
+
+Alguns repositórios têm uma esteira que transforma a PR em task. **Ela não é
+universal e pode não estar ativa no repositório em que você está.** Quando está:
 
 1. Você abre a PR.
-2. O CI publica um Storybook **exclusivo daquela PR**, num endereço derivado do
+2. O CI publica um Storybook exclusivo daquela PR, num endereço derivado do
    número dela.
 3. Um webhook lê a lista de arquivos tocados. Se algum bate com o caminho do
-   playground, cria a task e avisa o canal do time.
+   playground configurado, cria a task e avisa o canal do time.
 4. O corpo da PR é copiado para o campo "Por quê" da task.
 
-O passo 3 é determinístico — comparação de caminho de arquivo, sem modelo no meio.
-Não tocou o playground, não nasce task. Isso é intencional: essa parte não pode falhar.
+O passo 3, quando existe, é comparação de caminho de arquivo — sem modelo no
+meio. Não tocou o playground, não nasce task.
+
+> **Não afirme que a task nasceu sem verificar.** Confirme que a esteira está
+> descrita no `CLAUDE.md` do repositório e que a task apareceu de fato. Se não
+> apareceu, avise que ela precisa ser criada à mão — dizer "pronto, já virou
+> task" sem checar é como o trabalho se perde.
 
 ## Regra 1 — o corpo da PR não é opcional
 
@@ -73,8 +83,11 @@ Ao capturar:
 - Se a story exigir interação para chegar ao estado alterado, reproduza a mesma
   sequência nas duas versões.
 
-Suba as imagens e embuta no markdown, ou arraste os arquivos direto na caixa de
-comentário — a maioria dos hosts de Git hospeda o anexo sozinha.
+**Se você é o agente:** não existe API pública de upload de anexo no GitHub, e
+arrastar arquivo é gesto de interface. Você não consegue anexar a imagem sozinho.
+Suba o arquivo para um host acessível e referencie por URL, ou entregue os prints
+ao humano com a instrução de arrastá-los na caixa de comentário. O que você não
+pode fazer é inventar a URL ou deixar o `<img>` apontando para o vazio.
 
 ## Regra 3 — o preview não existe no instante em que a PR abre
 
@@ -96,7 +109,7 @@ O título vira o nome da task e é o que aparece no canal do time.
 
 - [ ] Corpo preenchido com "Por quê" real, não o resumo do diff
 - [ ] Cada mudança visual listada em uma linha
-- [ ] Print antes e depois anexado (ou comentário de follow-up planejado)
+- [ ] Print do "antes" anexado; o "depois" entra quando o preview subir (Regra 3)
 - [ ] Título descreve o efeito percebido
 - [ ] Só arquivos que você pretendia tocar estão no diff
 

@@ -8,22 +8,12 @@
     {
       "name": "storybook-design-pr",
       "source": "./skills/storybook-design-pr",
-      "description": "Use quando uma mudança visual virar Pull Request — designer ou agente alterando componente, protótipo ou story de Storybook. Garante que a PR carregue o porquê, o print antes/depois e o link do preview."
-    },
-    {
-      "name": "subagent-driven-development",
-      "source": "./skills/subagent-driven-development",
-      "description": "Use when executing implementation plans with independent tasks in the current session"
+      "description": "Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz um corpo de PR com o porquê e o antes/depois. Não use em mudança só de lógica, sem efeito visual."
     },
     {
       "name": "test-driven-development",
       "source": "./skills/test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code"
-    },
-    {
-      "name": "web-design-guidelines",
-      "source": "./skills/web-design-guidelines",
-      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\"."
     }
   ]
 }
