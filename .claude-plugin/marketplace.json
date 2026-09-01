@@ -13,7 +13,7 @@
     {
       "name": "storybook-design-pr",
       "source": "./skills/storybook-design-pr",
-      "description": "Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz um corpo de PR com o porquê e o antes/depois. Não use em mudança só de lógica, sem efeito visual."
+      "description": "Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz o card que avisa o designer e um corpo de PR com o porquê e o antes/depois. Abrir a PR sozinha não avisa ninguém. Não use em mudança só de lógica, sem efeito visual."
     },
     {
       "name": "test-driven-development",
