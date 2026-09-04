@@ -30,7 +30,15 @@ jobs:
 
   ingest:
     # On push to main (or manual re-trigger): parse + embed + upsert into the registry.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    #
+    # 🚨 `main` only, including the manual re-trigger. workflow_dispatch accepts
+    # any ref, and the batch now carries `prune: true` — dispatching this from a
+    # branch would publish that branch's manifest AND delete every skill the
+    # branch does not declare. The push trigger is already branch-scoped; this
+    # closes the dispatch door on the same rule.
+    if: |
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
