@@ -135,6 +135,14 @@ function readManifestSlugs(): string[] {
 			console.error(`${MANIFEST}: plugin "${p?.name}" has no ./skills/<slug> source`);
 			process.exit(2);
 		}
+		// A slug declared twice is not harmless: the batch would carry the same
+		// (source, slug) twice and Postgres refuses the whole upsert with "ON
+		// CONFLICT DO UPDATE command cannot affect row a second time" — nothing
+		// publishes, not just the duplicate.
+		if (slugs.includes(m[1])) {
+			console.error(`${MANIFEST}: "${m[1]}" is declared more than once`);
+			process.exit(2);
+		}
 		slugs.push(m[1]);
 	}
 	return slugs;
@@ -217,9 +225,22 @@ function main() {
 		process.exit(1);
 	}
 
+	// `prune: true` — this batch is the COMPLETE published set for this source,
+	// so the registry deletes the rows it does not mention. Without it, removing
+	// a skill here left the row (and its body, served from the pinned commit) on
+	// the site forever. Safe to send because the manifest is the publisher and
+	// the drift gate above already refused any divergence from disk.
+	const payload = { skills: out, prune: true };
+
 	if (process.env.DRY_RUN === "1" || !url || !secret) {
 		console.log("DRY_RUN / no endpoint configured — not posting.");
-		console.log(JSON.stringify({ skills: out.map((s) => ({ ...s, body: undefined })) }, null, 2));
+		console.log(
+			JSON.stringify(
+				{ ...payload, skills: out.map((s) => ({ ...s, body: undefined })) },
+				null,
+				2,
+			),
+		);
 		return;
 	}
 
@@ -229,7 +250,7 @@ function main() {
 			Authorization: `Bearer ${secret}`,
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ skills: out }),
+		body: JSON.stringify(payload),
 	})
 		.then(async (r) => {
 			const txt = await r.text();

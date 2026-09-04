@@ -34,10 +34,13 @@ A divergência falha o CI nas duas direções:
 Ou seja: criar a pasta não publica. Declarar sem criar não passa. Remover é tirar do
 manifesto **e** apagar a pasta, no mesmo commit.
 
-Depois de qualquer remoção, confirme o estado real:
+Remover **despublica**: o lote vai com `prune: true`, então o registro apaga a linha de
+qualquer slug que este manifesto não declara mais. Isso não era verdade até 2026-09-04 —
+a linha ficava, e continuava servindo o corpo da skill a partir do commit fixado na
+ingestão. Confirme mesmo assim:
 
 ```
-curl -s https://skills.devfellowship.com/api/v1/skills | jq '.[].slug'
+curl -s https://skills.devfellowship.com/api/v1/skills | jq '.skills[].skill'
 ```
 
 ## Contribuindo
