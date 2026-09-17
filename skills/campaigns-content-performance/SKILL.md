@@ -23,17 +23,28 @@ If the requested period lacks a baseline, mark its coverage as incomplete.
 Do not calculate a period gain from the lifetime value.
 Explain which earlier snapshot is missing and which posts are affected.
 
+## Resolve the account
+
+1. Call the existing `list_zernio_accounts` directory tool with an empty input.
+2. Match the user's human label against each returned `label`.
+3. Call `list_campaign_accounts` to find accounts with collected analytics.
+4. Intersect the rows where `id` equals `account_id` and `platform` equals `platform`.
+5. Continue only when the intersection contains one exact account.
+
+If the intersection contains zero or multiple accounts, stop.
+Show the candidate IDs and platforms.
+Ask the user for one precise account.
+Never select an account by platform or label similarity.
+
 ## Collect the evidence
 
-1. Call `list_campaign_accounts` to resolve the requested account.
-2. Keep each account separate if the request names more than one account.
-3. Call `rank_account_posts` with the account row's `account_id` and `platform`.
-4. Set `metric` to `views`, `likes`, `comments`, or `engagement`.
-5. Also pass `basis` and `limit`.
-6. For a period report, pass `start_date` and `end_date`.
-7. Call `get_post_metric_history` for each winner and each important anomaly.
-8. Copy `post_id`, `account_id`, and `platform` from the same ranking row into every history call.
-9. Add `start_date` and `end_date` when the report has a date boundary.
+1. Call `rank_account_posts` with the resolved `account_id` and `platform`.
+2. Set `metric` to `views`, `likes`, `comments`, or `engagement`.
+3. Also pass `basis` and `limit`.
+4. For a period report, pass `start_date` and `end_date`.
+5. Call `get_post_metric_history` for each winner and each important anomaly.
+6. Copy `post_id`, `account_id`, and `platform` from the same ranking row into every history call.
+7. Add `start_date` and `end_date` when the report has a date boundary.
 
 The MCP accepts history calls without `account_id` or `platform`.
 Do not omit them.

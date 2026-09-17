@@ -39,45 +39,61 @@ interface Frontmatter {
 	[k: string]: unknown;
 }
 
+function parseInlineTags(value: string, context: string): string[] {
+	if (!/^\[[^\[\]]*\]$/.test(value)) {
+		throw new Error(`${context}: unsupported tags format; use an inline [tag, tag] list`);
+	}
+	return value
+		.slice(1, -1)
+		.split(",")
+		.map((tag) => tag.trim().replace(/^["']|["']$/g, ""))
+		.filter(Boolean);
+}
+
 /** Minimal YAML frontmatter parser (name/description/kind/tags). */
 function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 	const m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(md);
 	if (!m) return { fm: {}, body: md };
 	const fm: Frontmatter = {};
 	const metadata: Pick<Frontmatter, "author" | "tags"> = {};
-	let section: string | undefined;
-	for (const line of m[1].split("\n")) {
-		const sectionMatch = /^([A-Za-z0-9_-]+):\s*$/.exec(line);
-		if (sectionMatch) {
-			section = sectionMatch[1];
-			continue;
-		}
-		const metadataKv = /^\s{2}([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
-		if (section === "metadata" && metadataKv) {
-			const key = metadataKv[1];
-			let val = metadataKv[2].trim();
-			if (key === "tags") {
-				val = val.replace(/^\[|\]$/g, "");
-				metadata.tags = val
-					.split(",")
-					.map((tag) => tag.trim().replace(/^["']|["']$/g, ""))
-					.filter(Boolean);
-			} else if (key === "author") {
-				metadata.author = val.replace(/^["']|["']$/g, "");
+	const lines = m[1].split("\n");
+	for (let index = 0; index < lines.length; index++) {
+		const line = lines[index];
+		if (line === "metadata:") {
+			let entries = 0;
+			while (index + 1 < lines.length && /^\s/.test(lines[index + 1])) {
+				index++;
+				const nested = /^  (author|tags):\s*(.+)$/.exec(lines[index]);
+				if (!nested) {
+					throw new Error(
+						`frontmatter line ${index + 1}: unsupported metadata shape; use two-space author and inline tags`,
+					);
+				}
+				entries++;
+				const [, key, rawValue] = nested;
+				const value = rawValue.trim();
+				if (key === "author") {
+					metadata.author = value.replace(/^["']|["']$/g, "");
+				} else {
+					metadata.tags = parseInlineTags(value, `frontmatter line ${index + 1}`);
+				}
+			}
+			if (entries === 0) {
+				throw new Error("frontmatter metadata: unsupported empty metadata shape");
 			}
 			continue;
 		}
-		if (!/^\s/.test(line)) section = undefined;
+		if (/^metadata:/.test(line)) {
+			throw new Error(
+				`frontmatter line ${index + 1}: unsupported metadata shape; use a two-space block`,
+			);
+		}
 		const kv = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
 		if (!kv) continue;
 		const key = kv[1];
-		let val = kv[2].trim();
+		const val = kv[2].trim();
 		if (key === "tags") {
-			val = val.replace(/^\[|\]$/g, "");
-			fm.tags = val
-				.split(",")
-				.map((t) => t.trim().replace(/^["']|["']$/g, ""))
-				.filter(Boolean);
+			fm.tags = parseInlineTags(val, `frontmatter line ${index + 1}`);
 		} else {
 			fm[key] = val.replace(/^["']|["']$/g, "");
 		}

@@ -38,12 +38,28 @@ function call(scenario, name) {
 	return calls;
 }
 
+function optionalCalls(scenario, name) {
+	return scenario.tool_trace.filter((entry) => entry.name === name);
+}
+
 function rankingRows(scenario) {
 	return call(scenario, "rank_account_posts").flatMap((entry) => entry.output.posts);
 }
 
 test("the fixture uses the exact Campaigns analytics MCP contract", () => {
 	for (const scenario of fixture.scenarios) {
+		const connectedAccounts = [];
+		for (const entry of call(scenario, "list_zernio_accounts")) {
+			exactKeys(entry.input, [], "Zernio account input");
+			exactKeys(entry.output, ["accounts", "next_step"], "Zernio account output");
+			assert.equal(typeof entry.output.next_step, "string");
+			for (const account of entry.output.accounts) {
+				exactKeys(account, ["id", "platform", "label"], "Zernio account");
+				assert.ok(platforms.has(account.platform));
+				connectedAccounts.push(account);
+			}
+		}
+
 		const accountPairs = new Set();
 		for (const entry of call(scenario, "list_campaign_accounts")) {
 			exactKeys(entry.input, entry.input.platform ? ["platform"] : [], "list input");
@@ -58,6 +74,25 @@ test("the fixture uses the exact Campaigns analytics MCP contract", () => {
 				accountPairs.add(`${account.account_id}\0${account.platform}`);
 			}
 		}
+		const candidates = connectedAccounts.filter(
+			(account) =>
+				account.label === scenario.target_account_label &&
+				accountPairs.has(`${account.id}\0${account.platform}`),
+		);
+		if (candidates.length !== 1) {
+			assert.equal(scenario.report.account_resolution.status, "ambiguous");
+			assert.deepEqual(
+				scenario.report.account_resolution.candidates,
+				candidates.map(({ id, platform, label }) => ({ id, platform, label })),
+			);
+			assert.match(scenario.report.account_resolution.question, /exact account id/i);
+			assert.equal(optionalCalls(scenario, "rank_account_posts").length, 0);
+			assert.equal(optionalCalls(scenario, "get_post_metric_history").length, 0);
+			continue;
+		}
+		assert.equal(scenario.report.account_resolution.status, "resolved");
+		assert.equal(scenario.report.account_resolution.account_id, candidates[0].id);
+		assert.equal(scenario.report.account_resolution.platform, candidates[0].platform);
 
 		for (const entry of call(scenario, "rank_account_posts")) {
 			const expectedInput = ["account_id", "platform", "metric", "basis", "limit"];
@@ -66,6 +101,8 @@ test("the fixture uses the exact Campaigns analytics MCP contract", () => {
 			}
 			exactKeys(entry.input, expectedInput, "ranking input");
 			assert.ok(accountPairs.has(`${entry.input.account_id}\0${entry.input.platform}`));
+			assert.equal(entry.input.account_id, candidates[0].id);
+			assert.equal(entry.input.platform, candidates[0].platform);
 			assert.ok(metrics.has(entry.input.metric));
 			assert.ok(["lifetime", "period_gain"].includes(entry.input.basis));
 			exactKeys(
@@ -177,10 +214,10 @@ test("the fixture uses the exact Campaigns analytics MCP contract", () => {
 test("the weekly forward report preserves coverage and platform boundaries", () => {
 	const scenario = fixture.scenarios.find((entry) => entry.name === "weekly-period-gain");
 	assert.equal(scenario.report.basis, "period_gain");
-	assert.equal(scenario.report.results.length, 2);
+	assert.ok(scenario.report.results.length > 0);
 	assert.equal(
 		new Set(scenario.report.results.map((entry) => `${entry.account_id}\0${entry.platform}`)).size,
-		2,
+		scenario.report.results.length,
 	);
 	assert.equal(scenario.report.cross_platform_comparison, null);
 	assert.match(scenario.report.platform_caveat, /separate/i);
@@ -228,4 +265,12 @@ test("the retrospective forward report labels absolute values as lifetime totals
 		assert.equal(result.winner.value_label, "lifetime total");
 		assert.doesNotMatch(result.winner.summary, /weekly gain/i);
 	}
+});
+
+test("same-platform account ambiguity stops before ranking", () => {
+	const scenario = fixture.scenarios.find((entry) => entry.name === "same-platform-ambiguity");
+	assert.ok(scenario, "the forward fixture must include a same-platform ambiguity");
+	assert.equal(scenario.report.account_resolution.status, "ambiguous");
+	assert.equal(optionalCalls(scenario, "rank_account_posts").length, 0);
+	assert.equal(optionalCalls(scenario, "get_post_metric_history").length, 0);
 });
