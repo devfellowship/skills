@@ -199,8 +199,6 @@ test("the fixture uses the exact Campaigns analytics MCP contract", () => {
 						"views",
 						"likes",
 						"comments",
-						"shares",
-						"saves",
 					],
 					"history point",
 				);

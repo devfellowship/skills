@@ -151,8 +151,8 @@
               "published_at": "2026-09-05T12:00:00Z"
             },
             "history": [
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 500, "likes": 30, "comments": 4, "shares": 2, "saves": 5},
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 450, "likes": 28, "comments": 4, "shares": 2, "saves": 5}
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 500, "likes": 30, "comments": 4},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 450, "likes": 28, "comments": 4}
             ],
             "count": 2
           }
@@ -175,8 +175,8 @@
               "published_at": "2026-09-06T12:00:00Z"
             },
             "history": [
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 200, "likes": 20, "comments": 5, "shares": 2, "saves": 3},
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 1500, "likes": 90, "comments": 15, "shares": 10, "saves": 20}
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 200, "likes": 20, "comments": 5},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 1500, "likes": 90, "comments": 15}
             ],
             "count": 2
           }
@@ -199,8 +199,8 @@
               "published_at": "2026-09-09T12:00:00Z"
             },
             "history": [
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12, "shares": 9, "saves": 18},
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15, "shares": 11, "saves": 22}
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15}
             ],
             "count": 2
           }
@@ -310,8 +310,8 @@
           "output": {
             "post": {"post_id": "22222222-2222-4222-8222-222222222222", "zernio_post_id": "zernio-ig-2", "title": "Onboarding checklist", "content_excerpt": "A second onboarding walkthrough presented as a checklist.", "published_at": "2026-09-09T12:00:00Z"},
             "history": [
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12, "shares": 9, "saves": 18},
-              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15, "shares": 11, "saves": 22}
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15}
             ],
             "count": 2
           }
