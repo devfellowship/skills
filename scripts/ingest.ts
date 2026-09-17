@@ -54,11 +54,26 @@ function parseInlineTags(value: string, context: string): string[] {
 	if (!/^\[[^\[\]]*\]$/.test(value)) {
 		throw new Error(`${context}: unsupported tags format; use an inline [tag, tag] list`);
 	}
-	return value
+	const tags = value
 		.slice(1, -1)
 		.split(",")
-		.map((tag) => tag.trim().replace(/^["']|["']$/g, ""))
-		.filter(Boolean);
+		.map((tag) => tag.trim());
+	return tags.filter(Boolean).map((tag) => {
+		const first = tag[0];
+		const last = tag[tag.length - 1];
+		if (first === '"' || first === "'") {
+			if (last !== first || tag.slice(1, -1).includes(first)) {
+				throw new Error(`${context}: tags contain an unterminated or mismatched quote`);
+			}
+			const unquoted = tag.slice(1, -1);
+			if (!unquoted) throw new Error(`${context}: tags must be non-empty scalars`);
+			return unquoted;
+		}
+		if (last === '"' || last === "'" || tag.includes('"') || tag.includes("'")) {
+			throw new Error(`${context}: tags contain an unterminated or mismatched quote`);
+		}
+		return tag;
+	});
 }
 
 function parseScalar(value: string, key: string, line: number): string {
@@ -66,8 +81,17 @@ function parseScalar(value: string, key: string, line: number): string {
 	if (!trimmed || /^[\[{>|]/.test(trimmed)) {
 		throw new Error(`frontmatter line ${line}: ${key} must be a non-empty scalar`);
 	}
-	const quoted = /^(?:"([^"]*)"|'([^']*)')$/.exec(trimmed);
-	const scalar = quoted ? (quoted[1] ?? quoted[2]) : trimmed;
+	const first = trimmed[0];
+	const last = trimmed[trimmed.length - 1];
+	let scalar = trimmed;
+	if (first === '"' || first === "'") {
+		if (last !== first || trimmed.slice(1, -1).includes(first)) {
+			throw new Error(`frontmatter line ${line}: ${key} has an unterminated or mismatched quote`);
+		}
+		scalar = trimmed.slice(1, -1);
+	} else if (last === '"' || last === "'") {
+		throw new Error(`frontmatter line ${line}: ${key} has an unterminated or mismatched quote`);
+	}
 	if (!scalar) throw new Error(`frontmatter line ${line}: ${key} must be a non-empty scalar`);
 	return scalar;
 }
@@ -325,6 +349,12 @@ function main() {
 		}
 		const content = new TextDecoder("utf-8", { fatal: true }).decode(skillFile.bytes);
 		const { fm, body } = parseFrontmatter(content);
+		if (typeof fm.name !== "string" || !fm.name.trim()) {
+			throw new Error(`frontmatter ${slug}: name is required`);
+		}
+		if (typeof fm.description !== "string" || !fm.description.trim()) {
+			throw new Error(`frontmatter ${slug}: description is required`);
+		}
 		const findings = auditFiles(onDiskFiles);
 		if (findings.length > 0) {
 			auditFailures++;
@@ -351,8 +381,8 @@ function main() {
 		out.push({
 			source,
 			slug,
-			name: fm.name || slug,
-			description: fm.description || "",
+			name: fm.name,
+			description: fm.description,
 			kind: (fm.kind as string) || "skill",
 			visibility,
 			content_sha256: sha256(content),

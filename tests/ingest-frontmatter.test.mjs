@@ -135,3 +135,29 @@ test("ingest rejects an unknown indented shape", () => {
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /unexpected indentation/i);
 });
+
+test("ingest rejects an unterminated author quote", () => {
+	const result = runIngest('name: example\ndescription: Example skill\nauthor: "taigfs');
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /author.*quote/i);
+});
+
+test("ingest rejects a mismatched quoted tag", () => {
+	const result = runIngest(
+		"name: example\ndescription: Example skill\ntags: [campaigns, \"analytics']",
+	);
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /tags.*quote/i);
+});
+
+test("ingest rejects missing name", () => {
+	const result = runIngest("description: Example skill\nauthor: taigfs");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /name.*required/i);
+});
+
+test("ingest rejects missing description", () => {
+	const result = runIngest("name: example\nauthor: taigfs");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /description.*required/i);
+});
