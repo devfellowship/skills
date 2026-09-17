@@ -44,7 +44,7 @@ Never select an account by platform or label similarity.
 ## Collect the evidence
 
 1. Call `rank_account_posts` with the resolved `account_id` and `platform`.
-2. Set `metric` to `views`, `likes`, `comments`, or `engagement`.
+2. Set `metric` to `views`, `likes`, or `comments`.
 3. Also pass `basis` and `limit`.
 4. For a period report, pass `start_date` and `end_date`.
 5. Call `get_post_metric_history` for each winner and each important anomaly.

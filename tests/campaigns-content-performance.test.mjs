@@ -55,3 +55,9 @@ test("the skill reflects the active period coverage and signed-gain contract", (
 	assert.match(skill, /negative period gain/i);
 	assert.match(skill, /do not clamp/i);
 });
+
+test("the first delivery allows only directly reported metrics", () => {
+	const skill = readFileSync(new URL("SKILL.md", skillPath), "utf8");
+	const metricInstruction = skill.split("\n").find((line) => line.startsWith("2. Set `metric`"));
+	assert.equal(metricInstruction, "2. Set `metric` to `views`, `likes`, or `comments`.");
+});

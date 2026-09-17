@@ -25,7 +25,7 @@ const platforms = new Set([
 	"whatsapp",
 	"google_business",
 ]);
-const metrics = new Set(["views", "likes", "comments", "engagement"]);
+const metrics = new Set(["views", "likes", "comments"]);
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function exactKeys(value, keys, label) {
