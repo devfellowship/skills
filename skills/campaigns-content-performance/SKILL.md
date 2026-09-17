@@ -43,12 +43,9 @@ Never select an account by platform or label similarity.
 3. Also pass `basis` and `limit`.
 4. For a period report, pass `start_date` and `end_date`.
 5. Call `get_post_metric_history` for each winner and each important anomaly.
-6. Copy `post_id`, `account_id`, and `platform` from the same ranking row into every history call.
-7. Add `start_date` and `end_date` when the report has a date boundary.
-
-The MCP accepts history calls without `account_id` or `platform`.
-Do not omit them.
-An omitted filter can combine publication targets for one Campaigns post.
+6. The history tool requires `post_id`, `account_id`, and `platform`.
+7. Copy all three values from the same ranking row into every history call.
+8. Add `start_date` and `end_date` when the report has a date boundary.
 
 Keep platform results separate.
 Metric meanings and collection coverage can differ by platform.
