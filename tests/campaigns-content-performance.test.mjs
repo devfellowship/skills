@@ -20,20 +20,6 @@ test("publishes the skill with the campaigns MCP dependency", () => {
 	assert.match(openai, /\$campaigns-content-performance/);
 });
 
-test("defines the required analysis tools and metric bases", () => {
-	const skill = readFileSync(new URL("SKILL.md", skillPath), "utf8");
-	for (const tool of [
-		"list_campaign_accounts",
-		"rank_account_posts",
-		"get_post_metric_history",
-	]) {
-		assert.match(skill, new RegExp(`\\b${tool}\\b`));
-	}
-	assert.match(skill, /basis=period_gain/);
-	assert.match(skill, /basis=lifetime/);
-	assert.match(skill, /baseline/i);
-});
-
 test("the registry ingest preserves standard metadata", () => {
 	const result = spawnSync("bun", ["scripts/ingest.ts"], {
 		cwd: new URL("..", import.meta.url),

@@ -27,11 +27,17 @@ Explain which earlier snapshot is missing and which posts are affected.
 
 1. Call `list_campaign_accounts` to resolve the requested account.
 2. Keep each account separate if the request names more than one account.
-3. Call `rank_account_posts` with `account_id`, `basis`, `metric`, and `limit`.
-4. For a period report, also pass `start_date` and `end_date`.
-5. Pass `platform` when the account includes multiple platforms.
-6. Call `get_post_metric_history` for each winner and each important anomaly.
-7. Use `post_id` plus optional `account_id`, `platform`, `start_date`, and `end_date` filters.
+3. Call `rank_account_posts` with the account row's `account_id` and `platform`.
+4. Set `metric` to `views`, `likes`, `comments`, or `engagement`.
+5. Also pass `basis` and `limit`.
+6. For a period report, pass `start_date` and `end_date`.
+7. Call `get_post_metric_history` for each winner and each important anomaly.
+8. Copy `post_id`, `account_id`, and `platform` from the same ranking row into every history call.
+9. Add `start_date` and `end_date` when the report has a date boundary.
+
+The MCP accepts history calls without `account_id` or `platform`.
+Do not omit them.
+An omitted filter can combine publication targets for one Campaigns post.
 
 Keep platform results separate.
 Metric meanings and collection coverage can differ by platform.
@@ -48,7 +54,7 @@ Include these sections:
 4. **Anomalies** — spikes, reversals, missing baselines, or unusual history changes.
 5. **Next actions** — small experiments with one change, one metric, and one evaluation window.
 
-Name the post identifier or URL for each finding.
+Name the Campaigns `post_id` for each finding.
 Show the observed counts before the interpretation.
 Use association language for patterns.
 Counts alone do not prove that a format, topic, or timing choice caused the result.
