@@ -44,7 +44,30 @@ function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 	const m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(md);
 	if (!m) return { fm: {}, body: md };
 	const fm: Frontmatter = {};
+	const metadata: Pick<Frontmatter, "author" | "tags"> = {};
+	let section: string | undefined;
 	for (const line of m[1].split("\n")) {
+		const sectionMatch = /^([A-Za-z0-9_-]+):\s*$/.exec(line);
+		if (sectionMatch) {
+			section = sectionMatch[1];
+			continue;
+		}
+		const metadataKv = /^\s{2}([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
+		if (section === "metadata" && metadataKv) {
+			const key = metadataKv[1];
+			let val = metadataKv[2].trim();
+			if (key === "tags") {
+				val = val.replace(/^\[|\]$/g, "");
+				metadata.tags = val
+					.split(",")
+					.map((tag) => tag.trim().replace(/^["']|["']$/g, ""))
+					.filter(Boolean);
+			} else if (key === "author") {
+				metadata.author = val.replace(/^["']|["']$/g, "");
+			}
+			continue;
+		}
+		if (!/^\s/.test(line)) section = undefined;
 		const kv = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
 		if (!kv) continue;
 		const key = kv[1];
@@ -59,6 +82,8 @@ function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 			fm[key] = val.replace(/^["']|["']$/g, "");
 		}
 	}
+	fm.author ??= metadata.author;
+	fm.tags ??= metadata.tags;
 	return { fm, body: m[2] };
 }
 

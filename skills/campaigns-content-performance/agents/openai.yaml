@@ -1,0 +1,13 @@
+interface:
+  display_name: "Campaign Content Performance"
+  short_description: "Analyze account and post performance trends"
+  default_prompt: "Use $campaigns-content-performance to prepare an evidence-based weekly content performance report for one account."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "campaigns"
+      description: "Campaign account and post analytics"
+      transport: "streamable_http"
+      url: "https://campaigns.mcp.devfellowship.com/mcp"
+policy:
+  allow_implicit_invocation: true
