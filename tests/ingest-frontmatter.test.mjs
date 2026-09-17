@@ -8,7 +8,7 @@ import test from "node:test";
 
 const ingest = fileURLToPath(new URL("../scripts/ingest.ts", import.meta.url));
 
-function runIngest(frontmatter) {
+function runIngestDocument(document) {
 	const workspace = mkdtempSync(join(tmpdir(), "dfl-skills-frontmatter-"));
 	try {
 		mkdirSync(join(workspace, ".claude-plugin"), { recursive: true });
@@ -22,7 +22,7 @@ function runIngest(frontmatter) {
 		);
 		writeFileSync(
 			join(workspace, "skills", "example", "SKILL.md"),
-			`---\n${frontmatter}\n---\n\n# Fixture\n`,
+			document,
 		);
 		const result = spawnSync("bun", [ingest], {
 			cwd: workspace,
@@ -39,6 +39,10 @@ function runIngest(frontmatter) {
 	} finally {
 		rmSync(workspace, { recursive: true, force: true });
 	}
+}
+
+function runIngest(frontmatter) {
+	return runIngestDocument(`---\n${frontmatter}\n---\n\n# Fixture\n`);
 }
 
 function payload(result) {
@@ -88,4 +92,46 @@ test("ingest rejects legacy block-list tags", () => {
 	);
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /unsupported tags/i);
+});
+
+test("ingest rejects a missing opening frontmatter delimiter", () => {
+	const result = runIngestDocument("name: example\ndescription: Example skill\n---\n\n# Fixture\n");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /frontmatter.*opening delimiter/i);
+});
+
+test("ingest rejects a missing closing frontmatter delimiter", () => {
+	const result = runIngestDocument("---\nname: example\ndescription: Example skill\n\n# Fixture\n");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /frontmatter.*closing delimiter/i);
+});
+
+test("ingest rejects an empty author", () => {
+	const result = runIngest("name: example\ndescription: Example skill\nauthor:");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /author.*non-empty scalar/i);
+});
+
+test("ingest rejects a structured author value", () => {
+	const result = runIngest("name: example\ndescription: Example skill\nauthor: [taigfs]");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /author.*scalar/i);
+});
+
+test("ingest rejects an unknown top-level key", () => {
+	const result = runIngest("name: example\ndescription: Example skill\nmaintainer: taigfs");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /unknown top-level key.*maintainer/i);
+});
+
+test("ingest rejects a malformed top-level line", () => {
+	const result = runIngest("name: example\ndescription: Example skill\nauthor taigfs");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /malformed top-level line/i);
+});
+
+test("ingest rejects an unknown indented shape", () => {
+	const result = runIngest("name: example\ndescription: Example skill\n  author: taigfs");
+	assert.notEqual(result.status, 0);
+	assert.match(result.stderr, /unexpected indentation/i);
 });

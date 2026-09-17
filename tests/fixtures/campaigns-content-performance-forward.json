@@ -24,7 +24,7 @@
               {
                 "account_id": "acct-instagram",
                 "platform": "instagram",
-                "post_count": 2,
+                "post_count": 3,
                 "first_snapshot_date": "2026-09-07",
                 "last_snapshot_date": "2026-09-13"
               },
@@ -81,6 +81,30 @@
                 }
               },
               {
+                "rank": 2,
+                "post_id": "55555555-5555-4555-8555-555555555555",
+                "zernio_post_id": "zernio-ig-3",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-3",
+                "title": "Release notes recap",
+                "content_excerpt": "A release recap whose reported view counter decreased during the period.",
+                "published_at": "2026-09-05T12:00:00Z",
+                "metric": "views",
+                "basis": "period_gain",
+                "value": -50,
+                "latest_absolute": 450,
+                "baseline_absolute": 500,
+                "coverage_status": "complete",
+                "snapshot_coverage": {
+                  "first_snapshot_date": "2026-09-07",
+                  "last_snapshot_date": "2026-09-13",
+                  "snapshot_count": 2,
+                  "baseline_date": "2026-09-07",
+                  "latest_date": "2026-09-13"
+                }
+              },
+              {
                 "rank": null,
                 "post_id": "22222222-2222-4222-8222-222222222222",
                 "zernio_post_id": "zernio-ig-2",
@@ -105,8 +129,32 @@
                 }
               }
             ],
-            "count": 2,
-            "coverage_warning": "1 post target(s) lack a usable period baseline or selected metric. Do not describe their lifetime counters as period gain."
+            "count": 3,
+            "coverage_warning": "1 post target(s) have incomplete coverage. At least one target lacks an observation inside the requested period, a usable baseline, or the selected metric. Do not describe their lifetime counters as period gain."
+          }
+        },
+        {
+          "name": "get_post_metric_history",
+          "input": {
+            "post_id": "55555555-5555-4555-8555-555555555555",
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "start_date": "2026-09-07",
+            "end_date": "2026-09-13"
+          },
+          "output": {
+            "post": {
+              "post_id": "55555555-5555-4555-8555-555555555555",
+              "zernio_post_id": "zernio-ig-3",
+              "title": "Release notes recap",
+              "content_excerpt": "A release recap whose reported view counter decreased during the period.",
+              "published_at": "2026-09-05T12:00:00Z"
+            },
+            "history": [
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 500, "likes": 30, "comments": 4, "shares": 2, "saves": 5},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 450, "likes": 28, "comments": 4, "shares": 2, "saves": 5}
+            ],
+            "count": 2
           }
         },
         {
@@ -173,7 +221,8 @@
           {"observation": "Onboarding language appears in both inspected Instagram posts.", "evidence_post_ids": ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"], "causal_claim": false}
         ],
         "anomalies": [
-          {"post_id": "22222222-2222-4222-8222-222222222222", "observation": "The first snapshot starts after the reporting window began."}
+          {"post_id": "22222222-2222-4222-8222-222222222222", "observation": "The first snapshot starts after the reporting window began."},
+          {"post_id": "55555555-5555-4555-8555-555555555555", "observation": "The reported view counter decreased by 50 during the period. Preserve this negative gain as a vendor-data reversal."}
         ],
         "next_actions": [
           {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "change": "Test onboarding against one different topic in the same format.", "evaluation_window_days": 7}

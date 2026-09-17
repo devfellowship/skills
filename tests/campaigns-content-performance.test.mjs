@@ -46,3 +46,12 @@ test("the registry ingest preserves standard metadata", () => {
 		"weekly-report",
 	]);
 });
+
+test("the skill reflects the active period coverage and signed-gain contract", () => {
+	const skill = readFileSync(new URL("SKILL.md", skillPath), "utf8");
+	assert.match(skill, /observation inside the requested period/i);
+	assert.match(skill, /usable baseline/i);
+	assert.match(skill, /selected metric/i);
+	assert.match(skill, /negative period gain/i);
+	assert.match(skill, /do not clamp/i);
+});

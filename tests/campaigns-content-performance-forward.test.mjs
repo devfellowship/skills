@@ -258,6 +258,26 @@ test("the weekly forward report preserves coverage and platform boundaries", () 
 	}
 });
 
+test("the weekly forward report preserves a negative period gain as an anomaly", () => {
+	const scenario = fixture.scenarios.find((entry) => entry.name === "weekly-period-gain");
+	const ranking = call(scenario, "rank_account_posts")[0].output;
+	assert.equal(
+		ranking.coverage_warning,
+		"1 post target(s) have incomplete coverage. At least one target lacks an observation inside the requested period, a usable baseline, or the selected metric. Do not describe their lifetime counters as period gain.",
+	);
+	const negative = ranking.posts.find((row) => row.value < 0);
+	assert.ok(negative, "the contract-valid fixture must include a signed counter decrease");
+	assert.equal(negative.basis, "period_gain");
+	assert.equal(negative.coverage_status, "complete");
+	assert.equal(negative.value, negative.latest_absolute - negative.baseline_absolute);
+	assert.ok(
+		scenario.report.anomalies.some(
+			(anomaly) => anomaly.post_id === negative.post_id && /decreas|negative|reversal/i.test(anomaly.observation),
+		),
+		"the report must expose the signed decrease instead of clamping it",
+	);
+});
+
 test("the retrospective forward report labels absolute values as lifetime totals", () => {
 	const scenario = fixture.scenarios.find((entry) => entry.name === "first-retrospective");
 	assert.equal(scenario.report.basis, "lifetime");

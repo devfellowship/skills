@@ -39,6 +39,17 @@ interface Frontmatter {
 	[k: string]: unknown;
 }
 
+const ALLOWED_FRONTMATTER_KEYS = new Set([
+	"name",
+	"description",
+	"kind",
+	"author",
+	"tags",
+	"metadata",
+	"license",
+	"allowed-tools",
+]);
+
 function parseInlineTags(value: string, context: string): string[] {
 	if (!/^\[[^\[\]]*\]$/.test(value)) {
 		throw new Error(`${context}: unsupported tags format; use an inline [tag, tag] list`);
@@ -50,15 +61,35 @@ function parseInlineTags(value: string, context: string): string[] {
 		.filter(Boolean);
 }
 
-/** Minimal YAML frontmatter parser (name/description/kind/tags). */
+function parseScalar(value: string, key: string, line: number): string {
+	const trimmed = value.trim();
+	if (!trimmed || /^[\[{>|]/.test(trimmed)) {
+		throw new Error(`frontmatter line ${line}: ${key} must be a non-empty scalar`);
+	}
+	const quoted = /^(?:"([^"]*)"|'([^']*)')$/.exec(trimmed);
+	const scalar = quoted ? (quoted[1] ?? quoted[2]) : trimmed;
+	if (!scalar) throw new Error(`frontmatter line ${line}: ${key} must be a non-empty scalar`);
+	return scalar;
+}
+
+/** Parse the small, explicit frontmatter subset supported by this publisher. */
 function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
-	const m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(md);
-	if (!m) return { fm: {}, body: md };
+	if (!md.startsWith("---\n")) {
+		throw new Error("frontmatter: missing opening delimiter");
+	}
+	const closing = md.indexOf("\n---", 4);
+	if (closing < 0 || !/^\n---(?:\n|$)/.test(md.slice(closing))) {
+		throw new Error("frontmatter: missing closing delimiter");
+	}
+	const frontmatter = md.slice(4, closing);
+	const afterDelimiter = closing + 4;
+	const body = md[afterDelimiter] === "\n" ? md.slice(afterDelimiter + 1) : md.slice(afterDelimiter);
 	const fm: Frontmatter = {};
 	const metadata: Pick<Frontmatter, "author" | "tags"> = {};
-	const lines = m[1].split("\n");
+	const lines = frontmatter.split("\n");
 	for (let index = 0; index < lines.length; index++) {
 		const line = lines[index];
+		if (line.trim() === "" || /^\s*#/.test(line)) continue;
 		if (line === "metadata:") {
 			let entries = 0;
 			while (index + 1 < lines.length && /^\s/.test(lines[index + 1])) {
@@ -73,7 +104,7 @@ function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 				const [, key, rawValue] = nested;
 				const value = rawValue.trim();
 				if (key === "author") {
-					metadata.author = value.replace(/^["']|["']$/g, "");
+					metadata.author = parseScalar(value, "author", index + 1);
 				} else {
 					metadata.tags = parseInlineTags(value, `frontmatter line ${index + 1}`);
 				}
@@ -88,19 +119,29 @@ function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 				`frontmatter line ${index + 1}: unsupported metadata shape; use a two-space block`,
 			);
 		}
+		if (/^\s/.test(line)) {
+			throw new Error(`frontmatter line ${index + 1}: unexpected indentation`);
+		}
 		const kv = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(line);
-		if (!kv) continue;
+		if (!kv) {
+			throw new Error(`frontmatter line ${index + 1}: malformed top-level line`);
+		}
 		const key = kv[1];
 		const val = kv[2].trim();
+		if (!ALLOWED_FRONTMATTER_KEYS.has(key)) {
+			throw new Error(`frontmatter line ${index + 1}: unknown top-level key ${key}`);
+		}
 		if (key === "tags") {
 			fm.tags = parseInlineTags(val, `frontmatter line ${index + 1}`);
+		} else if (key === "author") {
+			fm.author = parseScalar(val, "author", index + 1);
 		} else {
-			fm[key] = val.replace(/^["']|["']$/g, "");
+			fm[key] = parseScalar(val, key, index + 1);
 		}
 	}
 	fm.author ??= metadata.author;
 	fm.tags ??= metadata.tags;
-	return { fm, body: m[2] };
+	return { fm, body };
 }
 
 /** High-risk audit patterns (advisory + CI gate). */
@@ -120,25 +161,68 @@ function audit(content: string): string[] {
 	return findings;
 }
 
-/** Every file in the skill folder can end up as agent instructions, not just SKILL.md. */
-function auditDir(dir: string): string[] {
+const IGNORED_NAMES = new Set([".git", "node_modules", "__pycache__", ".DS_Store"]);
+const IGNORED_SUFFIXES = [".pyc", ".pyo"];
+const SAFE_PATH = /^[A-Za-z0-9_.][A-Za-z0-9_./-]*$/;
+const MAX_FILE_BYTES = 512 * 1024;
+const MAX_FILES_PER_SKILL = 100;
+const MAX_SKILL_BYTES = 4 * 1024 * 1024;
+
+interface SkillFileOnDisk {
+	path: string;
+	bytes: Uint8Array;
+}
+
+/** Every regular file under the skill directory, in a stable order. */
+function walkSkillDir(dir: string): SkillFileOnDisk[] {
+	const found: SkillFileOnDisk[] = [];
+	const walk = (current: string, prefix: string): void => {
+		for (const entry of readdirSync(current, { withFileTypes: true })) {
+			if (IGNORED_NAMES.has(entry.name)) continue;
+			if (IGNORED_SUFFIXES.some((suffix) => entry.name.endsWith(suffix))) continue;
+			const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+			const absolute = join(current, entry.name);
+			if (entry.isSymbolicLink()) continue;
+			if (entry.isDirectory()) {
+				walk(absolute, relative);
+			} else if (entry.isFile()) {
+				found.push({ path: relative, bytes: new Uint8Array(readFileSync(absolute)) });
+			}
+		}
+	};
+	walk(dir, "");
+	found.sort((left, right) => {
+		if (left.path === "SKILL.md") return -1;
+		if (right.path === "SKILL.md") return 1;
+		return left.path.localeCompare(right.path);
+	});
+	return found;
+}
+
+/** Every delivered text file can become agent instructions, not only SKILL.md. */
+function auditFiles(files: SkillFileOnDisk[]): string[] {
 	const findings: string[] = [];
-	for (const entry of readdirSync(dir, { recursive: true, withFileTypes: true })) {
-		if (!entry.isFile()) continue;
-		const path = join(entry.parentPath ?? dir, entry.name);
+	for (const file of files) {
 		let content: string;
 		try {
-			content = readFileSync(path, "utf8");
+			content = new TextDecoder("utf-8", { fatal: true }).decode(file.bytes);
+			if (content.includes("\0")) continue;
 		} catch {
 			continue;
 		}
-		for (const label of audit(content)) findings.push(`${entry.name}:${label}`);
+		for (const label of audit(content)) findings.push(`${file.path}:${label}`);
 	}
 	return findings;
 }
 
-function sha256(s: string): string {
+function sha256(s: string | Uint8Array): string {
 	return createHash("sha256").update(s).digest("hex");
+}
+
+interface OutSkillFile {
+	path: string;
+	sha256: string;
+	bytes: number;
 }
 
 interface OutSkill {
@@ -153,6 +237,7 @@ interface OutSkill {
 	tags: string[];
 	author?: string;
 	body: string;
+	files: OutSkillFile[];
 }
 
 /** Slugs declared in the manifest, derived from each plugin's `source` path. */
@@ -230,20 +315,39 @@ function main() {
 	let auditFailures = 0;
 
 	for (const slug of declared) {
-		const skillMd = join(SKILLS_DIR, slug, "SKILL.md");
-		let content: string;
-		try {
-			content = readFileSync(skillMd, "utf8");
-		} catch {
+		const dir = join(SKILLS_DIR, slug);
+		const onDiskFiles = walkSkillDir(dir);
+		const skillFile = onDiskFiles.find((file) => file.path === "SKILL.md");
+		if (!skillFile) {
+			const skillMd = join(dir, "SKILL.md");
 			console.error(`DRIFT: ${MANIFEST} declares ${slug} but ${skillMd} is missing`);
 			process.exit(1);
 		}
+		const content = new TextDecoder("utf-8", { fatal: true }).decode(skillFile.bytes);
 		const { fm, body } = parseFrontmatter(content);
-		const findings = auditDir(join(SKILLS_DIR, slug));
+		const findings = auditFiles(onDiskFiles);
 		if (findings.length > 0) {
 			auditFailures++;
 			console.error(`AUDIT ${slug}: ${findings.join(", ")}`);
 		}
+		let totalBytes = 0;
+		const files = onDiskFiles.map((file) => {
+			if (!SAFE_PATH.test(file.path) || /(^|\/)\.\.(\/|$)/.test(file.path)) {
+				throw new Error(`MANIFEST ${slug}: unsupported path ${file.path}`);
+			}
+			if (file.bytes.byteLength > MAX_FILE_BYTES) {
+				throw new Error(`MANIFEST ${slug}: ${file.path} exceeds ${MAX_FILE_BYTES} bytes`);
+			}
+			totalBytes += file.bytes.byteLength;
+			return { path: file.path, sha256: sha256(file.bytes), bytes: file.bytes.byteLength };
+		});
+		if (files.length > MAX_FILES_PER_SKILL) {
+			throw new Error(`MANIFEST ${slug}: more than ${MAX_FILES_PER_SKILL} files`);
+		}
+		if (totalBytes > MAX_SKILL_BYTES) {
+			throw new Error(`MANIFEST ${slug}: exceeds ${MAX_SKILL_BYTES} total bytes`);
+		}
+
 		out.push({
 			source,
 			slug,
@@ -256,6 +360,7 @@ function main() {
 			tags: fm.tags || [],
 			author: fm.author,
 			body,
+			files,
 		});
 	}
 

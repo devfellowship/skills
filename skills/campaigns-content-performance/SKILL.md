@@ -19,9 +19,14 @@ Do not replace it with direct database or Zernio access.
 - Label every lifetime value as a lifetime total.
 - Never describe a lifetime total as a weekly gain.
 
-If the requested period lacks a baseline, mark its coverage as incomplete.
-Do not calculate a period gain from the lifetime value.
-Explain which earlier snapshot is missing and which posts are affected.
+Treat coverage as incomplete when a target lacks an observation inside the requested period.
+Also treat a missing usable baseline or selected metric as incomplete coverage.
+Do not calculate a period gain from a lifetime value.
+Explain which evidence is missing and which posts are affected.
+
+A negative period gain is valid vendor data when an absolute counter decreases.
+Keep its sign, report it as an anomaly, and inspect its metric history.
+Do not clamp the value to zero or convert it to an absolute value.
 
 ## Resolve the account
 
