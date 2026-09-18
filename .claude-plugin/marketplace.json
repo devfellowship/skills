@@ -11,6 +11,11 @@
       "description": "Use sempre que for abrir uma task de trabalho pela ferramenta `create_task` do MCP — inclusive quando a task nasce de um plano, de uma conversa ou de uma PR. Garante que a task nasça com etapa, com o \"por quê\" e ligada ao plano certo. Não use para editar task existente."
     },
     {
+      "name": "campaigns-content-performance",
+      "source": "./skills/campaigns-content-performance",
+      "description": "Analyze collected Campaigns post metrics for one social account. Use for weekly performance reports, retrospective rankings, or evidence-based content experiments. Do not use to publish content, schedule reports, or claim causation."
+    },
+    {
       "name": "storybook-design-pr",
       "source": "./skills/storybook-design-pr",
       "description": "Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz o card que avisa o designer e um corpo de PR com o porquê e o antes/depois. Abrir a PR sozinha não avisa ninguém. Não use em mudança só de lógica, sem efeito visual."

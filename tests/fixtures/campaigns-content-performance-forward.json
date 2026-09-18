@@ -1,0 +1,375 @@
+{
+  "scenarios": [
+    {
+      "name": "weekly-period-gain",
+      "request": "Prepare Acme's Instagram weekly report for 2026-09-07 through 2026-09-13.",
+      "target_account_label": "Acme",
+      "tool_trace": [
+        {
+          "name": "list_zernio_accounts",
+          "input": {},
+          "output": {
+            "accounts": [
+              {"id": "acct-instagram", "platform": "instagram", "label": "Acme"},
+              {"id": "acct-linkedin", "platform": "linkedin", "label": "Acme LinkedIn"}
+            ],
+            "next_step": "Pass the selected account id as zernio_account_id on its matching channel."
+          }
+        },
+        {
+          "name": "list_campaign_accounts",
+          "input": {},
+          "output": {
+            "accounts": [
+              {
+                "account_id": "acct-instagram",
+                "platform": "instagram",
+                "post_count": 3,
+                "first_snapshot_date": "2026-09-07",
+                "last_snapshot_date": "2026-09-13"
+              },
+              {
+                "account_id": "acct-linkedin",
+                "platform": "linkedin",
+                "post_count": 2,
+                "first_snapshot_date": "2026-09-07",
+                "last_snapshot_date": "2026-09-13"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rank_account_posts",
+          "input": {
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "metric": "views",
+            "basis": "period_gain",
+            "start_date": "2026-09-07",
+            "end_date": "2026-09-13",
+            "limit": 5
+          },
+          "output": {
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "metric": "views",
+            "basis": "period_gain",
+            "period": {"start_date": "2026-09-07", "end_date": "2026-09-13"},
+            "posts": [
+              {
+                "rank": 1,
+                "post_id": "11111111-1111-4111-8111-111111111111",
+                "zernio_post_id": "zernio-ig-1",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-1",
+                "title": "Onboarding in three steps",
+                "content_excerpt": "A short onboarding walkthrough with one concrete example.",
+                "published_at": "2026-09-06T12:00:00Z",
+                "metric": "views",
+                "basis": "period_gain",
+                "value": 1300,
+                "latest_absolute": 1500,
+                "baseline_absolute": 200,
+                "coverage_status": "complete",
+                "snapshot_coverage": {
+                  "first_snapshot_date": "2026-09-07",
+                  "last_snapshot_date": "2026-09-13",
+                  "snapshot_count": 3,
+                  "baseline_date": "2026-09-07",
+                  "latest_date": "2026-09-13"
+                }
+              },
+              {
+                "rank": 2,
+                "post_id": "55555555-5555-4555-8555-555555555555",
+                "zernio_post_id": "zernio-ig-3",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-3",
+                "title": "Release notes recap",
+                "content_excerpt": "A release recap whose reported view counter decreased during the period.",
+                "published_at": "2026-09-05T12:00:00Z",
+                "metric": "views",
+                "basis": "period_gain",
+                "value": -50,
+                "latest_absolute": 450,
+                "baseline_absolute": 500,
+                "coverage_status": "complete",
+                "snapshot_coverage": {
+                  "first_snapshot_date": "2026-09-07",
+                  "last_snapshot_date": "2026-09-13",
+                  "snapshot_count": 2,
+                  "baseline_date": "2026-09-07",
+                  "latest_date": "2026-09-13"
+                }
+              },
+              {
+                "rank": null,
+                "post_id": "22222222-2222-4222-8222-222222222222",
+                "zernio_post_id": "zernio-ig-2",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-2",
+                "title": "Onboarding checklist",
+                "content_excerpt": "A second onboarding walkthrough presented as a checklist.",
+                "published_at": "2026-09-09T12:00:00Z",
+                "metric": "views",
+                "basis": "period_gain",
+                "value": null,
+                "latest_absolute": 2100,
+                "baseline_absolute": null,
+                "coverage_status": "missing_baseline",
+                "snapshot_coverage": {
+                  "first_snapshot_date": "2026-09-10",
+                  "last_snapshot_date": "2026-09-13",
+                  "snapshot_count": 2,
+                  "baseline_date": null,
+                  "latest_date": "2026-09-13"
+                }
+              }
+            ],
+            "count": 3,
+            "coverage_warning": "1 post target(s) have incomplete coverage. At least one target lacks an observation inside the requested period, a usable baseline, or the selected metric. Do not describe their lifetime counters as period gain."
+          }
+        },
+        {
+          "name": "get_post_metric_history",
+          "input": {
+            "post_id": "55555555-5555-4555-8555-555555555555",
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "start_date": "2026-09-07",
+            "end_date": "2026-09-13"
+          },
+          "output": {
+            "post": {
+              "post_id": "55555555-5555-4555-8555-555555555555",
+              "zernio_post_id": "zernio-ig-3",
+              "title": "Release notes recap",
+              "content_excerpt": "A release recap whose reported view counter decreased during the period.",
+              "published_at": "2026-09-05T12:00:00Z"
+            },
+            "history": [
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 500, "likes": 30, "comments": 4},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-3", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 450, "likes": 28, "comments": 4}
+            ],
+            "count": 2
+          }
+        },
+        {
+          "name": "get_post_metric_history",
+          "input": {
+            "post_id": "11111111-1111-4111-8111-111111111111",
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "start_date": "2026-09-07",
+            "end_date": "2026-09-13"
+          },
+          "output": {
+            "post": {
+              "post_id": "11111111-1111-4111-8111-111111111111",
+              "zernio_post_id": "zernio-ig-1",
+              "title": "Onboarding in three steps",
+              "content_excerpt": "A short onboarding walkthrough with one concrete example.",
+              "published_at": "2026-09-06T12:00:00Z"
+            },
+            "history": [
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-07", "collected_at": "2026-09-07T12:00:00Z", "source_updated_at": null, "views": 200, "likes": 20, "comments": 5},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-1", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 1500, "likes": 90, "comments": 15}
+            ],
+            "count": 2
+          }
+        },
+        {
+          "name": "get_post_metric_history",
+          "input": {
+            "post_id": "22222222-2222-4222-8222-222222222222",
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "start_date": "2026-09-07",
+            "end_date": "2026-09-13"
+          },
+          "output": {
+            "post": {
+              "post_id": "22222222-2222-4222-8222-222222222222",
+              "zernio_post_id": "zernio-ig-2",
+              "title": "Onboarding checklist",
+              "content_excerpt": "A second onboarding walkthrough presented as a checklist.",
+              "published_at": "2026-09-09T12:00:00Z"
+            },
+            "history": [
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15}
+            ],
+            "count": 2
+          }
+        }
+      ],
+      "report": {
+        "account_resolution": {"status": "resolved", "account_id": "acct-instagram", "platform": "instagram", "label": "Acme"},
+        "basis": "period_gain",
+        "results": [
+          {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "winner": {"post_id": "11111111-1111-4111-8111-111111111111", "value": 1300, "value_label": "period gain", "summary": "The post gained 1,300 views during the period."}}
+        ],
+        "coverage_caveats": [
+          {"post_id": "22222222-2222-4222-8222-222222222222", "message": "The period baseline is missing. The 2,100-view lifetime total is not a weekly gain."}
+        ],
+        "platform_caveat": "This result keeps the selected Instagram account separate from all other accounts and platforms.",
+        "cross_platform_comparison": null,
+        "repeatable_patterns": [
+          {"observation": "Onboarding language appears in both inspected Instagram posts.", "evidence_post_ids": ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222"], "causal_claim": false}
+        ],
+        "anomalies": [
+          {"post_id": "22222222-2222-4222-8222-222222222222", "observation": "The first snapshot starts after the reporting window began."},
+          {"post_id": "55555555-5555-4555-8555-555555555555", "observation": "The reported view counter decreased by 50 during the period. Preserve this negative gain as a vendor-data reversal."}
+        ],
+        "next_actions": [
+          {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "change": "Test onboarding against one different topic in the same format.", "evaluation_window_days": 7}
+        ]
+      }
+    },
+    {
+      "name": "first-retrospective",
+      "request": "Prepare the first retrospective report for Acme's Instagram account.",
+      "target_account_label": "Acme",
+      "tool_trace": [
+        {
+          "name": "list_zernio_accounts",
+          "input": {},
+          "output": {
+            "accounts": [
+              {"id": "acct-instagram", "platform": "instagram", "label": "Acme"}
+            ],
+            "next_step": "Pass the selected account id as zernio_account_id on its matching channel."
+          }
+        },
+        {
+          "name": "list_campaign_accounts",
+          "input": {"platform": "instagram"},
+          "output": {
+            "accounts": [
+              {"account_id": "acct-instagram", "platform": "instagram", "post_count": 2, "first_snapshot_date": "2026-09-07", "last_snapshot_date": "2026-09-13"}
+            ]
+          }
+        },
+        {
+          "name": "rank_account_posts",
+          "input": {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "basis": "lifetime", "limit": 5},
+          "output": {
+            "account_id": "acct-instagram",
+            "platform": "instagram",
+            "metric": "views",
+            "basis": "lifetime",
+            "period": null,
+            "posts": [
+              {
+                "rank": 1,
+                "post_id": "22222222-2222-4222-8222-222222222222",
+                "zernio_post_id": "zernio-ig-2",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-2",
+                "title": "Onboarding checklist",
+                "content_excerpt": "A second onboarding walkthrough presented as a checklist.",
+                "published_at": "2026-09-09T12:00:00Z",
+                "metric": "views",
+                "basis": "lifetime",
+                "value": 2100,
+                "latest_absolute": 2100,
+                "baseline_absolute": null,
+                "coverage_status": "complete",
+                "snapshot_coverage": {"first_snapshot_date": "2026-09-10", "last_snapshot_date": "2026-09-13", "snapshot_count": 2, "baseline_date": null, "latest_date": "2026-09-13"}
+              },
+              {
+                "rank": 2,
+                "post_id": "11111111-1111-4111-8111-111111111111",
+                "zernio_post_id": "zernio-ig-1",
+                "platform": "instagram",
+                "account_id": "acct-instagram",
+                "platform_post_id": "ig-platform-1",
+                "title": "Onboarding in three steps",
+                "content_excerpt": "A short onboarding walkthrough with one concrete example.",
+                "published_at": "2026-09-06T12:00:00Z",
+                "metric": "views",
+                "basis": "lifetime",
+                "value": 1500,
+                "latest_absolute": 1500,
+                "baseline_absolute": null,
+                "coverage_status": "complete",
+                "snapshot_coverage": {"first_snapshot_date": "2026-09-07", "last_snapshot_date": "2026-09-13", "snapshot_count": 3, "baseline_date": null, "latest_date": "2026-09-13"}
+              }
+            ],
+            "count": 2,
+            "coverage_warning": null
+          }
+        },
+        {
+          "name": "get_post_metric_history",
+          "input": {"post_id": "22222222-2222-4222-8222-222222222222", "account_id": "acct-instagram", "platform": "instagram", "start_date": "2026-09-07", "end_date": "2026-09-13"},
+          "output": {
+            "post": {"post_id": "22222222-2222-4222-8222-222222222222", "zernio_post_id": "zernio-ig-2", "title": "Onboarding checklist", "content_excerpt": "A second onboarding walkthrough presented as a checklist.", "published_at": "2026-09-09T12:00:00Z"},
+            "history": [
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-10", "collected_at": "2026-09-10T12:00:00Z", "source_updated_at": null, "views": 1800, "likes": 80, "comments": 12},
+              {"platform": "instagram", "account_id": "acct-instagram", "platform_post_id": "ig-platform-2", "collected_for": "2026-09-13", "collected_at": "2026-09-13T12:00:00Z", "source_updated_at": null, "views": 2100, "likes": 92, "comments": 15}
+            ],
+            "count": 2
+          }
+        }
+      ],
+      "report": {
+        "account_resolution": {"status": "resolved", "account_id": "acct-instagram", "platform": "instagram", "label": "Acme"},
+        "basis": "lifetime",
+        "results": [
+          {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "winner": {"post_id": "22222222-2222-4222-8222-222222222222", "value": 2100, "value_label": "lifetime total", "summary": "The post leads with a 2,100-view lifetime total."}}
+        ],
+        "coverage_caveats": [],
+        "platform_caveat": "This result covers only the Instagram account.",
+        "cross_platform_comparison": null,
+        "repeatable_patterns": [],
+        "anomalies": [],
+        "next_actions": [
+          {"account_id": "acct-instagram", "platform": "instagram", "metric": "views", "change": "Use period_gain after the next complete weekly baseline exists.", "evaluation_window_days": 7}
+        ]
+      }
+    },
+    {
+      "name": "same-platform-ambiguity",
+      "request": "Prepare the weekly report for Acme's Instagram account.",
+      "target_account_label": "Acme",
+      "tool_trace": [
+        {
+          "name": "list_zernio_accounts",
+          "input": {},
+          "output": {
+            "accounts": [
+              {"id": "acct-acme-company", "platform": "instagram", "label": "Acme"},
+              {"id": "acct-acme-personal", "platform": "instagram", "label": "Acme"}
+            ],
+            "next_step": "Pass the selected account id as zernio_account_id on its matching channel."
+          }
+        },
+        {
+          "name": "list_campaign_accounts",
+          "input": {"platform": "instagram"},
+          "output": {
+            "accounts": [
+              {"account_id": "acct-acme-company", "platform": "instagram", "post_count": 4, "first_snapshot_date": "2026-09-01", "last_snapshot_date": "2026-09-13"},
+              {"account_id": "acct-acme-personal", "platform": "instagram", "post_count": 3, "first_snapshot_date": "2026-09-02", "last_snapshot_date": "2026-09-13"}
+            ]
+          }
+        }
+      ],
+      "report": {
+        "account_resolution": {
+          "status": "ambiguous",
+          "candidates": [
+            {"id": "acct-acme-company", "platform": "instagram", "label": "Acme"},
+            {"id": "acct-acme-personal", "platform": "instagram", "label": "Acme"}
+          ],
+          "question": "Which exact account id should I use: acct-acme-company or acct-acme-personal?"
+        }
+      }
+    }
+  ]
+}

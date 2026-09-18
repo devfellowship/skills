@@ -4,9 +4,9 @@ name: Skills ingest + audit
 on:
   push:
     branches: [main]
-    paths: ["skills/**", "scripts/ingest.ts", ".claude-plugin/marketplace.json"]
+    paths: ["skills/**", "scripts/ingest.ts", "tests/**", ".claude-plugin/marketplace.json"]
   pull_request:
-    paths: ["skills/**", "scripts/ingest.ts", ".claude-plugin/marketplace.json"]
+    paths: ["skills/**", "scripts/ingest.ts", "tests/**", ".claude-plugin/marketplace.json"]
   workflow_dispatch: {}
 
 jobs:
@@ -20,6 +20,8 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
+      - name: Skill contract tests
+        run: node --test tests/*.test.mjs
       - name: Audit scan (gate)
         env:
           SKILLS_SOURCE: ${{ github.repository }}
@@ -39,6 +41,7 @@ jobs:
     if: |
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
       && github.ref == 'refs/heads/main'
+    needs: audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
