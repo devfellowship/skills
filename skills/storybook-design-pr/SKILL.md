@@ -30,36 +30,44 @@ ninguém depois de você consegue recuperá-lo a partir do diff.
 **Não usar** quando a mudança é só de lógica sem efeito visual — não há o que o
 designer revisar, e o formato aqui vira ruído.
 
-## 🔴 Abrir a PR não avisa ninguém — o card é seu
+## 🔴 Quem cria o card depende do repositório
 
-**Não conte com a PR para criar o card.** O aviso ao designer sai do **estado do
-card** — ele dispara quando uma task entra na etapa de design —, não do evento de
-abertura da PR.
+O aviso ao designer sai do **estado do card**: ele dispara quando uma task entra na
+etapa `design` ou `decision`, numa epic que tem canal. Então o que importa é **existir
+um card**, e só um. Quem cria esse card depende de o repositório ter **rota de design**
+(`work.design_task_routes`):
 
-O motivo importa pra você: design acontece **antes** de existir código. Um aviso
-amarrado à PR silencia justamente o começo do trabalho, e não enxerga nada que
-nasça fora do GitHub — card aberto à mão, por MCP ou por outro serviço.
+**Repositório com rota** — hoje `iterahq/itera-player` e
+`devfellowship/dfl-components-cli`. A PR que toca a pasta do playground **cria o card
+sozinha**, em `decision`, na epic da rota, já com a PR e o link do preview. Então:
 
-Consequência direta: **se você abrir a PR e não criar o card, o designer não fica
-sabendo de nada.** Nada falha, nada avisa. A PR fica verde e o trabalho some.
+1. **Não crie o card antes.** Criar à mão e depois abrir a PR gera dois cards.
+2. Se o card **já existe** (o designer abriu, ou veio de um plano), escreva o código
+   dele (`DFL-xxx`) no corpo ou no título da PR. O webhook liga a PR a esse card e
+   **não** cria outro.
+3. Depois de abrir, confirme que o card apareceu (ou que a PR ficou ligada ao card
+   citado). PR de fork não cria card: o repositório pode ser público.
 
-O que você faz:
+**Repositório sem rota** — a PR não cria nada. Nada falha, nada avisa: a PR fica
+verde e o trabalho some. Então:
 
 1. **Crie o card primeiro**, com `create_task` do MCP, na etapa `design` (ainda é
-   exploração) ou `decision` (é proposta esperando alguém bater o martelo). Siga a
-   skill `criacao-de-task`. Preencha os links do pacote de contexto (PR, Storybook,
-   playground, arquivos) — é o que faz o card se explicar sozinho.
-2. **Escolha a epic com atenção.** O canal para onde o aviso vai é uma propriedade
-   da epic, não da task, e o comportamento é fail-closed: epic sem canal
-   configurado → o card nasce e ninguém é avisado, em silêncio. Não invente epic;
-   pergunte qual usar.
-3. Abra a PR e referencie o card no corpo.
+   exploração) ou `decision` (proposta esperando alguém bater o martelo). Siga a skill
+   `criacao-de-task` e preencha os links do pacote de contexto (PR, Storybook,
+   playground, arquivos).
+2. Abra a PR com o código do card (`DFL-xxx`) no corpo.
 
-O CI segue publicando um Storybook exclusivo da PR num endereço derivado do número
-dela — isso não mudou, e é o link que o designer abre.
+Nos dois casos, **a epic decide o canal.** Epic sem canal configurado → o card nasce
+e ninguém é avisado, em silêncio (fail-closed). Não invente epic; pergunte qual usar.
+
+Como saber se o repositório tem rota: o `CLAUDE.md` do repositório diz. Se não disser,
+trate como sem rota e pergunte.
+
+O CI dos repositórios com rota publica um Storybook exclusivo da PR num endereço
+derivado do número dela — é o link que o designer abre.
 
 > **Não afirme que o designer foi avisado sem verificar.** Card criado em epic sem
-> canal não gera mensagem nenhuma e não devolve erro. Confirme que o card existe,
+> canal não gera mensagem nenhuma e não devolve erro. Confirme que existe **um** card,
 > que está na etapa de design e que a epic tem canal. Dizer "pronto, já avisei"
 > sem checar é exatamente como o trabalho se perde.
 
@@ -122,7 +130,8 @@ Use o mesmo texto no nome do card — é ele que aparece no canal do time.
 
 ## Checklist antes de abrir
 
-- [ ] Card criado na etapa de design, numa epic que tem canal configurado
+- [ ] Exatamente um card na etapa de design, numa epic com canal: criado pela PR (repo com rota) ou à mão antes dela (repo sem rota)
+- [ ] Se o card já existia, o código `DFL-xxx` está no corpo da PR
 - [ ] Corpo preenchido com "Por quê" real, não o resumo do diff
 - [ ] Cada mudança visual listada em uma linha
 - [ ] Print do "antes" anexado; o "depois" entra quando o preview subir (Regra 3)

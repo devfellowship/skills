@@ -41,10 +41,10 @@ Escolha por **onde o trabalho começa**, não por onde ele vai terminar:
 |---|---|---|
 | `design` | Ideation | ainda é exploração: referência, ideia, alternativa |
 | `decision` | Design Review | tem proposta pronta esperando alguém bater o martelo |
-| `qa` | QA / Microcopy | é conferência de acabamento — texto, estado de borda |
+| `qa` | QA / Test | é conferência de acabamento — texto, estado de borda |
 | `spec` | Spec | o requisito ainda está sendo detalhado |
 | `execution` | Execução | está pronto para ser construído |
-| `review` | Revisão | é validação final de trabalho já feito |
+| `review` | QA / Test (selo Engineering) | é validação final de trabalho já feito |
 
 O que você passa é sempre o **id** da coluna da esquerda. O nome do meio é só o
 rótulo do board e já mudou uma vez sem que o id mudasse — não use o rótulo como
