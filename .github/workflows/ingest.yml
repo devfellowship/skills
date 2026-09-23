@@ -4,9 +4,9 @@ name: Skills ingest + audit
 on:
   push:
     branches: [main]
-    paths: ["skills/**", "scripts/ingest.ts", "tests/**", ".claude-plugin/marketplace.json"]
+    paths: ["skills/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
   pull_request:
-    paths: ["skills/**", "scripts/ingest.ts", "tests/**", ".claude-plugin/marketplace.json"]
+    paths: ["skills/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
   workflow_dispatch: {}
 
 jobs:
@@ -22,6 +22,17 @@ jobs:
           bun-version: latest
       - name: Skill contract tests
         run: node --test tests/*.test.mjs
+      # Ownership (README.md, "Dono e revisão"). CODEOWNERS is generated
+      # from every `author:`, and the ruleset requires a code-owner review.
+      - name: CODEOWNERS matches the generator
+        run: bun scripts/codeowners.ts --check
+      # GitHub drops an owner without write access silently. Ask it directly.
+      - name: GitHub accepts every owner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: bun scripts/codeowners.ts --github-errors
       - name: Audit scan (gate)
         env:
           SKILLS_SOURCE: ${{ github.repository }}
