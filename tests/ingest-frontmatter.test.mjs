@@ -161,3 +161,40 @@ test("ingest rejects missing description", () => {
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /description.*required/i);
 });
+
+for (const name of ["admin", "System", "claude", "ANTHROPIC", "\"admin \"", "ad-min"]) {
+	test(`ingest rejects reserved name ${name}`, () => {
+		const result = runIngest(`name: ${name}\ndescription: Example skill`);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /reserved word/i);
+	});
+}
+
+for (const [label, name] of [
+	["fullwidth", "ａｄｍｉｎ"],
+	["cyrillic a", "аdmin"],
+	["cyrillic e", "systеm"],
+	["greek omicron and alpha", "clαude"],
+	["zero-width joiner", "admin‍"],
+]) {
+	test(`ingest rejects reserved name disguised with ${label}`, () => {
+		const result = runIngest(`name: ${name}\ndescription: Example skill`);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /reserved word/i);
+	});
+}
+
+for (const name of ["claude-helper", "anthropic_tools", "my.claude.skill"]) {
+	test(`ingest rejects brand token in name ${name}`, () => {
+		const result = runIngest(`name: ${name}\ndescription: Example skill`);
+		assert.notEqual(result.status, 0);
+		assert.match(result.stderr, /reserved word/i);
+	});
+}
+
+for (const name of ["design-system", "admin-dashboard", "systematic-review", "claudette"]) {
+	test(`ingest accepts name ${name} that only contains a reserved word`, () => {
+		const skill = payload(runIngest(`name: ${name}\ndescription: Example skill`));
+		assert.equal(skill.name, name);
+	});
+}
