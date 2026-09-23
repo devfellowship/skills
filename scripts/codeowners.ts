@@ -41,6 +41,8 @@ export const CORE_TEAM = "@devfellowship/core";
 export const ORG_AUTHOR = "devfellowship";
 
 const HANDLE_RE = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
+/** A directory named `*` would become a CODEOWNERS glob over every skill. */
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 /**
  * The GitHub owner an `author:` resolves to. `null` means core owns it.
@@ -66,6 +68,10 @@ export function buildOwnership(root: string): { lines: string[]; errors: Array<{
 		: [];
 	for (const slug of slugs) {
 		const file = `skills/${slug}/SKILL.md`;
+		if (!SLUG_RE.test(slug)) {
+			errors.push({ file, message: `directory name "${slug}" is not a slug (${SLUG_RE}).` });
+			continue;
+		}
 		try {
 			const owner = ownerOf(parseFrontmatter(readFileSync(join(root, file), "utf8")).fm.author);
 			if (owner) lines.push(`/skills/${slug}/ ${owner} ${CORE_TEAM}`);

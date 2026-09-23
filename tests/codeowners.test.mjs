@@ -56,6 +56,17 @@ test("a free-text author is refused, not guessed", () => {
 	}
 });
 
+test("a directory that is not a slug is refused, so it cannot become a glob", () => {
+	const root = workspace({ "*": "author: taigfs\n" });
+	try {
+		const result = run(root, "--write");
+		assert.equal(result.status, 1);
+		assert.match(result.stderr, /is not a slug/);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("a hand edit to CODEOWNERS is drift", () => {
 	const root = workspace({ alpha: "author: taigfs\n" });
 	try {

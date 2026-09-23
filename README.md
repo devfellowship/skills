@@ -78,6 +78,12 @@ O GitHub lê o CODEOWNERS da **branch de destino**, não do PR. Por isso:
 - **Editar o CODEOWNERS na mão não adianta.** O arquivo é do core, e o CI o
   regenera a partir dos `author:`.
 
+**O que isso não cobre:** quem tem acesso de escrita consegue rodar workflow a
+partir de uma branch própria, e o segredo de ingestão ainda é segredo comum do
+repositório. Esse caminho escreve no registro sem revisão. Até o segredo ir
+para um environment restrito à `main`, dê acesso de escrita só a quem você
+confiaria o registro inteiro.
+
 PR de fork, de fora da organização, é bem-vindo. Ele entra quando o dono da
 skill, ou o core, aprova.
 
