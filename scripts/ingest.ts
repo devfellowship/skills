@@ -50,6 +50,52 @@ const ALLOWED_FRONTMATTER_KEYS = new Set([
 	"allowed-tools",
 ]);
 
+const RESERVED_NAMES = new Set(["admin", "system", "claude", "anthropic"]);
+const RESERVED_NAME_TOKENS = new Set(["claude", "anthropic"]);
+
+const LOOKALIKES: Record<string, string> = {
+	"\u0430": "a",
+	"\u0435": "e",
+	"\u043e": "o",
+	"\u0441": "c",
+	"\u0455": "s",
+	"\u0456": "i",
+	"\u0442": "t",
+	"\u0443": "y",
+	"\u043c": "m",
+	"\u043d": "h",
+	"\u0440": "p",
+	"\u0445": "x",
+	"\u0501": "d",
+	"\u04cf": "l",
+	"\u03b1": "a",
+	"\u03b5": "e",
+	"\u03bf": "o",
+	"\u03b9": "i",
+	"\u03bd": "v",
+	"\u03c1": "p",
+	"\u03c4": "t",
+	"\u0131": "i",
+};
+
+function foldName(name: string): string {
+	return [...name.normalize("NFKC").toLowerCase()]
+		.map((char) => LOOKALIKES[char] ?? char)
+		.join("");
+}
+
+function assertNotReservedName(name: string, line: number): void {
+	const folded = foldName(name);
+	const tokens = folded.split(/[^a-z0-9]+/).filter(Boolean);
+	const compact = tokens.join("");
+	const reserved =
+		(RESERVED_NAMES.has(compact) ? compact : undefined) ??
+		tokens.find((token) => RESERVED_NAME_TOKENS.has(token));
+	if (reserved) {
+		throw new Error(`frontmatter line ${line}: name uses the reserved word ${reserved}`);
+	}
+}
+
 function parseInlineTags(value: string, context: string): string[] {
 	if (!/^\[[^\[\]]*\]$/.test(value)) {
 		throw new Error(`${context}: unsupported tags format; use an inline [tag, tag] list`);
@@ -161,6 +207,7 @@ function parseFrontmatter(md: string): { fm: Frontmatter; body: string } {
 			fm.author = parseScalar(val, "author", index + 1);
 		} else {
 			fm[key] = parseScalar(val, key, index + 1);
+			if (key === "name") assertNotReservedName(fm.name as string, index + 1);
 		}
 	}
 	fm.author ??= metadata.author;
