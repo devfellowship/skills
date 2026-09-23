@@ -43,6 +43,44 @@ ingestão. Confirme mesmo assim:
 curl -s https://skills.devfellowship.com/api/v1/skills | jq '.skills[].skill'
 ```
 
+## Dono e revisão
+
+Toda skill tem **um dono**: o handle do GitHub no `author:` dela. Uma mudança na
+skill só entra com aprovação do dono ou de alguém do time
+**`devfellowship/core`** (quem mantém o registro). Aprovação de outra pessoa não
+conta.
+
+| O quê | Dono |
+|---|---|
+| `skills/<slug>/` | o `author:` do frontmatter do `SKILL.md` |
+| sem `author:`, ou `author: devfellowship` | o time core |
+| skill nova, `.claude-plugin/marketplace.json` e todo o resto | o time core |
+
+O `marketplace.json` fica com o core porque é ele que publica: tirar uma entrada
+despublica a skill.
+
+### Como isso é garantido
+
+1. `scripts/codeowners.ts` transforma cada `author:` numa linha do
+   `.github/CODEOWNERS`. Cada linha nomeia o dono **e** o core.
+2. Um ruleset do repositório na `main` exige **revisão de code owner**. Um PR que
+   mexe na sua skill espera você (ou o core), não importa quem mais aprovou.
+3. O CI falha quando o arquivo commitado difere do gerador, quando um `author:`
+   não é handle do GitHub e quando o GitHub recusa um dono — por exemplo, alguém
+   sem acesso de escrita aqui.
+
+O GitHub lê o CODEOWNERS da **branch de destino**, não do PR. Por isso:
+
+- **Skill nova passa pelo core.** Ela ainda não tem linha. O core confere se o
+  `author:` é quem abriu o PR.
+- **Tomar a skill de alguém exige a aprovação dessa pessoa.** Um PR que troca o
+  `author:` continua sendo do dono atual até entrar.
+- **Editar o CODEOWNERS na mão não adianta.** O arquivo é do core, e o CI o
+  regenera a partir dos `author:`.
+
+PR de fork, de fora da organização, é bem-vindo. Ele entra quando o dono da
+skill, ou o core, aprova.
+
 ## Contribuindo
 
 - **`description` é gatilho, não resumo.** O agente sempre enxerga `name` +
@@ -55,5 +93,8 @@ curl -s https://skills.devfellowship.com/api/v1/skills | jq '.skills[].skill'
 - **Nada interno no texto**: hostname interno, id de canal, nome de repositório
   privado, nome de pessoa do time. Este repositório é público e o histórico do git
   também.
+- **`author:` é o seu handle do GitHub.** Ele define quem aprova mudanças na
+  skill (veja "Dono e revisão"). Rode `bun scripts/codeowners.ts --write`
+  e commite o `.github/CODEOWNERS` no mesmo PR.
 - **Redistribuindo material de terceiro?** Adicione a atribuição no `NOTICE` no mesmo
   PR — antes de o conteúdo entrar.
