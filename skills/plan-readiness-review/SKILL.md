@@ -7,8 +7,8 @@ tags: [planning, review, checklist, decisions]
 
 # Readiness review — the final verdict
 
-**Core principle:** readiness is a checklist run by someone who did not write the
-body. One ✗ blocks publishing.
+**Core principle:** readiness is a checklist run by B (who did not write phases
+3–4) or a fresh agent — never A. One ✗ blocks publishing.
 
 *(Plans were published under an expiring publish window, four times in one hour,
 to a tracker with no delete. Their holes were structural and checkable.)*
@@ -48,7 +48,7 @@ Template: `complex-plan/templates/READINESS.md`. Each line ✓/✗ + evidence.
 - [ ] `format-check.md` from `plan-dual-draft` prints no finding.
 - [ ] Every PR row and phase has done-when (observed live) · depends-on · owner.
 - [ ] Header lists what was not read (`sources/NOT-READ.md`).
-- [ ] Body ≤ 60 KB; decisions and criteria only. Progress goes to `EXECUTION-LOG.md`.
+- [ ] Body ≤ 60 KB (or a one-line reason); decisions and criteria only. Progress goes to `EXECUTION-LOG.md`.
   *(A plan grew from 43 KB to 184 KB of logs; its own lead said "I don't know what's going on anymore".)*
 
 **Hygiene**

@@ -6,7 +6,7 @@
 
 > "<exact words of the requester, including quality words like 'visually stunning'>"
 
-- **Success =** <measurable outcome, e.g. "two people's trees merged and compared on Monday">.
+- **Success =** <measurable outcome, e.g. "a new user finishes checkout on a 360 px phone in under 2 minutes">.
 - Style / scope vetoes: "<reference X is for content, not aesthetics>".
 - Out of scope unless stated: <list>.
 

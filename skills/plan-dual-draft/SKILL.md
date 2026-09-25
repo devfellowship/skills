@@ -43,7 +43,7 @@ both replies to `diffs.md` — the disagreement list, on record before any excha
 | Flow | When | Steps |
 |---|---|---|
 | **Default** (measured) | always, unless below | merge → knock-down → dialog → close-out |
-| **Cross-read** (the requester's original method; unmeasured) | the requester asks for it, or the two angles barely overlap | each planner reads the other plan and appends what it lacks under "Adopted from X", changing nothing it already decided → A merges; every line of `diffs.md` becomes an ADR → knock-down → dialog → joint close-out |
+| **Cross-read** (the requester's original method; **unmeasured** — record whether its disagreements survived to ADRs) | the requester asks for it, or the two angles barely overlap | each planner reads the other plan and appends what it lacks under "Adopted from X", changing nothing it already decided → A merges; every line of `diffs.md` becomes an ADR → knock-down → dialog → joint close-out |
 
 Never let two agents edit the same file. "Together" means turns in `dialog.md`.
 

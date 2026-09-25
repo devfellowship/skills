@@ -36,6 +36,10 @@ For every output (card, message, email, report, row someone reads):
 
 - Separate by configuration, not intent: which board/channel/project in test and in prod.
 - Test items: marked, never in a consumer's queue, with a named cleanup.
+- A destination the decider chose (board, channel, project) is never swapped for a
+  test one silently. A swap is an open correction in `EXECUTION-LOG.md` with a
+  revert date, and the decider is told the same day. *(The lead picked one board;
+  the agent shipped to its own test board; nobody compared them for six weeks.)*
 - Promotion from test to prod is a PR row with an owner; a known consumer-facing
   defect blocks expanding to more repos or users.
 

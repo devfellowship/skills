@@ -33,7 +33,7 @@ Phases 3–4 are edited by the planner who merged (resumed), and attacked once
 more in phase 5 by the reviewer who did not write them. Templates for every file:
 `templates/`.
 
-**Small plan** (3–5 PRs, one repo): phases 1, 3, 4, 5 are still mandatory. Phase 2
+**Small plan** (3–5 PRs, one repo): phases 1, 3, 4, 5 are mandatory; phase 6 whenever anyone other than the planner executes. Phase 2
 becomes one planner covering both angles + one knock-down reviewer
 (`plan-dual-draft/prompts.md`, "Single planner").
 
@@ -65,6 +65,6 @@ three rows of the PR table. A summary of intentions does not count.
 
 ## Budget (so no phase eats the run)
 
-Phase 1 ≤ 30 % of the effort, phase 2 ≤ 30 %, phases 3–5 ≤ 30 %. Plan body ≤ 60 KB.
+Phase 1 ≤ 30 % of the effort, phase 2 ≤ 30 %, phases 3–5 ≤ 30 %. Plan body ≤ 60 KB by default; going over needs one line of reason in `READINESS.md`.
 Heavy agents in parallel: as many as the machine's RAM allows, never more than 3
 by default.

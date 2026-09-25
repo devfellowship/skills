@@ -8,4 +8,4 @@
 - **Done when:** <copied from the PR row>, with evidence (screenshot / row id / URL) in the PR body.
 - **No dead controls:** every rendered button works.
 - **Budget:** max <n> heavy processes; e2e runs <where>.
-- **Coordination:** commit WIP early; write `<!-- DONE PR n -->` to EXECUTION-LOG.md when finished.
+- **Coordination:** commit WIP early; write `logs/PR-<n>.done` when finished; only the owner session edits EXECUTION-LOG.md.

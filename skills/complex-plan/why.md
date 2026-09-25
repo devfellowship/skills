@@ -1,6 +1,6 @@
 # Why this pack exists
 
-Distilled from six large plans — a capability-graph app, a mobile version of a
+Distilled from seven large plans — a capability-graph app, a mobile version of a
 video editor, a UI redesign of the same editor, a design→dev notification
 pipeline, a skills marketplace, a content-analytics schema, a revenue funnel —
 and every bug that came after them.

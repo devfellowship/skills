@@ -3,7 +3,8 @@
 
 Prints one line per finding and exits 1 when there is any; prints "ok" and exits 0 otherwise.
 Checks: ADR fields, question fields, headings after "Out of scope", ADR-N / Q-N referenced
-but never defined or used before being defined, and the sentinel line when the file is a draft.
+but never defined, and the sentinel line when the file is a draft. References used before their
+definition are printed as "warn:" lines (plans often list ADRs at the end); they do not fail.
 """
 import re
 import sys
@@ -55,10 +56,10 @@ def main(path):
             if not has_field(body, names):
                 findings.append(f"line {ln}: {head[:60]} — missing **{f}")
 
-    oos = next((i for i, l in enumerate(lines) if re.match(r"^##\s+.*out of scope", l, re.I)), None)
+    oos = next((i for i, l in enumerate(lines) if re.match(r"^#{2,6}\s+.*out of scope", l, re.I)), None)
     if oos is not None:
         for i in range(oos + 1, len(lines)):
-            if re.match(r"^##\s", lines[i]) and not re.search(r"appendix|anexo|changelog", lines[i], re.I):
+            if re.match(r"^#{2,6}\s", lines[i]) and not re.search(r"appendix|anexo|changelog", lines[i], re.I):
                 findings.append(f"line {i + 1}: heading after 'Out of scope': {lines[i].strip()[:60]}")
 
     defined = {}
@@ -66,16 +67,25 @@ def main(path):
         m = re.match(r"^###\s+((?:ADR|Q)-\d+)\b", l)
         if m:
             defined.setdefault(m.group(1), i)
+    warnings = []
+    provenance = re.compile(r"came from where|summary|resumo|veio de onde", re.I)
+    section = ""
+    warned = set()
     for i, l in enumerate(lines):
+        if re.match(r"^##\s", l):
+            section = l
         for ref in set(re.findall(r"\b((?:ADR|Q)-\d+)\b", l)):
             if ref not in defined:
                 findings.append(f"line {i + 1}: {ref} referenced, never defined")
                 defined[ref] = -1  # report once
+            elif defined[ref] > i and not l.startswith("#") and not provenance.search(section) and ref not in warned:
+                warnings.append(f"warn: line {i + 1}: {ref} used before its definition (line {defined[ref] + 1})")
+                warned.add(ref)
 
     if re.search(r"plan-[AB]\.md|plan-merged\.md", path) and "-DONE -->" not in (lines[-1] if lines else ""):
         findings.append("last line: sentinel <!-- …-DONE --> missing")
 
-    for f in findings:
+    for f in findings + warnings:
         print(f)
     if not findings:
         print("ok")

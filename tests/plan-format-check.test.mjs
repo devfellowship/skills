@@ -86,3 +86,15 @@ test("a draft file without its sentinel is a finding", () => {
 	assert.match(r.out, /sentinel/);
 	assert.equal(check(`${good}<!-- MERGE-DONE -->\n`, "plan-merged.md").code, 0);
 });
+
+test("a nested heading after Out of scope is a finding", () => {
+	const r = check(good.replace("## Appendix", "### Tasks"));
+	assert.equal(r.code, 1);
+	assert.match(r.out, /heading after 'Out of scope': ### Tasks/);
+});
+
+test("a reference used before its definition warns without failing", () => {
+	const r = check(`## Scope\nDepends on ADR-1.\n${good}`);
+	assert.equal(r.code, 0, r.out);
+	assert.match(r.out, /warn: line 2: ADR-1 used before its definition/);
+});

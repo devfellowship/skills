@@ -41,7 +41,7 @@ One per agent, from `complex-plan/templates/EXECUTOR-BRIEF.md`:
   until applied. *(A correction said in chat was lost when an incident took over.)*
 - A requester answer that overrides an ADR: edit the ADR in the live plan first,
   then act. Executors follow the plan, not the chat.
-- Removing a capability is its own approval item, announced to its consumer.
+- Removing a capability: see `plan-acceptance-gates/non-ui-gates.md` §5.
 
 ## Resuming after a crash or handoff
 

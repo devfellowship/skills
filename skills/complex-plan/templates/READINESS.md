@@ -1,6 +1,6 @@
 # READINESS — <plan> v<n>
 
-Run by: <reviewer that did not write the body>   Date: <date>
+Run by: <B or a fresh agent — never A>   Date: <date>
 
 | # | Check | ✓/✗ | Evidence (line / file / command) |
 |---|---|---|---|
