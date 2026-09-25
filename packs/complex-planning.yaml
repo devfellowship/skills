@@ -1,0 +1,30 @@
+# Plan large software work so it ships without bugs. The root routes through
+# the other six in a fixed order; its body names every member below.
+schema: 1
+name: complex-planning
+title: Complex planning
+description: >-
+  Plan large software work — a new app, a redesign, a mobile version, a
+  pipeline — so it ships without bugs: sources on disk, two blind planners and
+  an adversarial review, acceptance gates that fail on their own, PR slicing,
+  a readiness verdict and the execution handoff.
+root: complex-plan
+tags:
+  - planning
+  - architecture
+  - multi-agent
+members:
+  - slug: complex-plan
+    role: root
+  - slug: plan-ground-truth
+    role: required
+  - slug: plan-dual-draft
+    role: required
+  - slug: plan-acceptance-gates
+    role: required
+  - slug: plan-slicing
+    role: required
+  - slug: plan-readiness-review
+    role: required
+  - slug: plan-execution-handoff
+    role: required
