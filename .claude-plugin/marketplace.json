@@ -28,37 +28,37 @@
     {
       "name": "complex-plan",
       "source": "./skills/complex-plan",
-      "description": "Use BEFORE writing a plan for large software work — a new app, a redesign, a mobile version, a cross-service pipeline, anything that will become 5+ PRs or be executed by other agents. Routes through the pack in a fixed order (ground truth → two-planner draft → acceptance gates → PR slicing → readiness review → execution handoff) and names the hard gates a plan must pass before it is published. Skip for a one-file bug fix, a question, or a plan that already exists and only needs a small edit."
+      "description": "Use BEFORE writing a plan for large software work — a new app, a redesign, a mobile version, a cross-service pipeline or integration, anything that will become 3+ PRs or be executed by other agents. Routes through the pack in a fixed order (ground truth → two-planner draft → acceptance gates → PR slicing → readiness review → execution handoff), names the file each phase produces and the hard gates a plan must pass before it is published. Skip for a one-file bug fix, a question, or a small edit to a plan that already exists."
     },
     {
       "name": "plan-ground-truth",
       "source": "./skills/plan-ground-truth",
-      "description": "Use at the very start of a large plan, before any drafting — put every primary source on disk, confirm scope, resolve unknown terms, audit the code with file:line, screenshot the current product, and probe live state (branch protection, CI time, release gates, tools, credentials). Also use when revising a plan (v2, v3): the revision re-reads the sources, not the previous version. Skip for a plan whose sources are a single short message you can quote whole."
+      "description": "Use at the very start of a large plan, before any drafting — put every primary source on disk, confirm scope, resolve unknown terms, audit the code with path:line, screenshot the current product, and probe live state (branch protection, CI time, release gates, tools, credentials). Also use for every revision (v2, v3), which re-reads the sources and not the previous version. Skip for a plan whose only source is one short message you can quote whole."
     },
     {
       "name": "plan-dual-draft",
       "source": "./skills/plan-dual-draft",
-      "description": "Use to draft a large plan with two independent planner agents — shared brief, blind drafts from different angles and models, a merge that picks instead of averaging, an adversarial review that tries to knock the plan down, a written dialog where the author may argue back, and a final consistency pass with a YES/NO verdict. Use after plan-ground-truth. Skip for a small plan (one planner plus one adversarial reviewer is enough) and for editing an existing plan."
+      "description": "Use to draft a large plan with two independent planner agents — shared brief, blind drafts from different angles and models, an optional cross-read, a merge that picks instead of averaging, an adversarial review that tries to knock the plan down, a written dialog where the author may argue back, and a consistency pass with a draft verdict. Use after plan-ground-truth. Skip for editing an existing plan; for a small plan use the single-planner prompt in prompts.md."
     },
     {
       "name": "plan-acceptance-gates",
       "source": "./skills/plan-acceptance-gates",
-      "description": "Use when writing the acceptance criteria, rollout and risk sections of a large plan — turns every prose promise into a gate that fires: checks on the running build, a viewport × input × content matrix, a default-path and flag-exit rule, shared-state isolation, the human who must see the result, measured limits and real-device proof. Use it on a finished draft too, as the checklist a reviewer attacks. Skip for backend-only refactors with no users, flags or limits involved."
+      "description": "Use when writing the acceptance criteria, rollout and risk sections of a large plan, and as the checklist a reviewer attacks a finished draft with. Turns every prose promise into a gate that can fail on its own — checks on the running build, a viewport × input × content matrix, a default-path and flag-exit rule, shared-state isolation, the human who must see each output, measured limits, test hygiene and real-device proof. Pipelines, webhooks and integrations use non-ui-gates.md. Skip only for a pure refactor with no user-visible output, no flag, no limit and no shared state."
     },
     {
       "name": "plan-slicing",
       "source": "./skills/plan-slicing",
-      "description": "Use when turning a large plan into PRs that several agents or people will build in parallel — assigns one owner PR per shared artifact, predicts file and behavior conflicts, adds sweep PRs for \"everywhere\" decisions, forbids temporarily unreachable features, and writes the merge and deploy order. Skip for a plan that is a single PR."
+      "description": "Use when turning a large plan into PRs that several agents or people will build in parallel — decides where code lives, assigns one owner PR per shared artifact, predicts file and behavior conflicts, adds sweep PRs for everywhere-decisions, forbids temporarily unreachable features, and writes the merge and deploy order into the PR table. Skip for a plan that is a single PR."
     },
     {
       "name": "plan-readiness-review",
       "source": "./skills/plan-readiness-review",
-      "description": "Use right before publishing or handing off a large plan — a mechanical checklist that blocks publishing while any finding is unowned, any decision is answered by the planner instead of its owner, any section is used before it is defined, or the body mixes decisions with execution logs. Also use for each revision (v2, v3). Skip for chat-only sketches that will not be executed."
+      "description": "Use right before publishing or handing off a large plan, and for every revision — one knock-down pass on the sections added after the draft, then a mechanical checklist that blocks publishing while any finding is unowned, any decision was answered by the planner instead of its owner, anything is used before it is defined, or the body mixes decisions with execution logs. Produces READINESS.md with the final YES/NO. Skip for chat-only sketches that will not be executed."
     },
     {
       "name": "plan-execution-handoff",
       "source": "./skills/plan-execution-handoff",
-      "description": "Use when a large plan is about to be executed by agents or people — writing executor briefs by section reference, setting the merge policy, the verification tools, the resource budget, and the definition of done (seen running on the tree real users get). Also use when resuming execution after a crash or handoff. Skip for executing a one-PR plan yourself."
+      "description": "Use when a large plan is about to be executed by agents or people, and when resuming execution after a crash or handoff — executor briefs by section reference, who merges, verification tools by path, resource budget, requester corrections mid-flight, and the definition of done (seen running on the path real users get). Skip for executing a one-PR plan yourself."
     }
   ]
 }

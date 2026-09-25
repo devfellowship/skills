@@ -1,105 +1,87 @@
 ---
 name: plan-dual-draft
-description: Use to draft a large plan with two independent planner agents — shared brief, blind drafts from different angles and models, a merge that picks instead of averaging, an adversarial review that tries to knock the plan down, a written dialog where the author may argue back, and a final consistency pass with a YES/NO verdict. Use after plan-ground-truth. Skip for a small plan (one planner plus one adversarial reviewer is enough) and for editing an existing plan.
+description: "Use to draft a large plan with two independent planner agents — shared brief, blind drafts from different angles and models, an optional cross-read, a merge that picks instead of averaging, an adversarial review that tries to knock the plan down, a written dialog where the author may argue back, and a consistency pass with a draft verdict. Use after plan-ground-truth. Skip for editing an existing plan; for a small plan use the single-planner prompt in prompts.md."
 author: SamuelStefano
 tags: [planning, multi-agent, review, architecture]
 ---
 
 # Two planners, one plan
 
-## Overview
-
-The best plan in the source cases took 22 minutes: two blind planners, one merge,
-one hostile review with 26 numbered findings, one written dialog, one
-consistency pass. The builder later loaded real content with zero warnings
-because the plan was precise enough to split work by section.
-
 **Core principle:** disagreement is the product. Two blind drafts surface the
 decisions; the merge records them; the review attacks them; the dialog lets the
 right side win with a source.
 
+Measured run: 22 minutes, 20 ADRs, 26 findings (22 accepted, 4 partial), 5 new
+inconsistencies caught by the final pass, verdict YES.
+
 ## Roles
 
-| Role | Model hint | Job |
+| Role | Model | Job |
 |---|---|---|
-| Orchestrator | any | writes `BRIEF.md`, launches, polls files, never reads 120 KB |
-| Planner A | strongest reasoning model | angle 1 (e.g. architecture, data, collaboration) — still covers every section |
-| Planner B | a *different* model | angle 2 (e.g. experience, visuals, performance) — still covers every section |
-| Merger | Planner A, resumed | one plan, decisions as ADRs, provenance section |
-| Reviewer | Planner B, resumed | tries to knock the merged plan down |
+| Orchestrator | any | writes `BRIEF.md`, launches, waits on files, never reads 120 KB |
+| Planner A | strongest reasoning model | angle 1 (architecture, data, collaboration) — covers every section |
+| Planner B | a **different** model | angle 2 (experience, visuals, performance) — covers every section |
+| Merger | A, resumed | one plan, decisions as ADRs |
+| Reviewer | B, resumed | knocks the merged plan down |
 
-Resume the same agents (keep their context) instead of starting new ones.
+Resume the same agents (they keep their plan in context). Known bias: B reviews
+a plan that contains half its own ideas — the hunt list below counters it by
+asking explicitly for depth lost from **both** drafts.
 
-## Step 1 — One shared brief
+## Step 1 — `BRIEF.md`
 
-`BRIEF.md`, read by both planners by path. Template in `brief-template.md`. It must hold:
-
-1. The requester's ask, **quoted**, including style vetoes ("reference for content, not aesthetics").
-2. Required reading, each item with *why* it matters (sources/CONTEXT.md, the code audits, prior plans to not contradict).
-3. The **non-negotiable model** stated once. Planners disagree on design, never on the model.
-4. A coverage checklist (10 points) — including "be specific: libraries, versions, data volumes", "MVP by <date> with acceptance per phase", "first tasks".
-5. The output format (ADR header shape, question shape A/B/C + recommended), so the result parses mechanically.
-6. Limits: no sub-agents, no code, no publishing, light exploration (RAM), a sentinel last line `<!-- PLAN-DONE -->`.
+Fill `brief-template.md`. Both planners read it by path.
 
 ## Step 2 — Blind drafts
 
-- Each prompt: "Do **not** read `plan-X.md`." Blindness prevents early convergence.
-- Each ends its chat reply with **5 lines: the 5 decisions you are most confident in**. The orchestrator diffs those, not the files.
-- Wait on files: `until grep -q 'PLAN-DONE' plan-A.md; do sleep 15; done`.
+"Do **not** read the other plan." Each ends its file with `<!-- PLAN-DONE -->`
+and replies with 5 lines: its 5 most confident decisions. The orchestrator saves
+both replies to `diffs.md` — the disagreement list, on record before any exchange.
 
-## Step 3 — Merge (picks, never averages)
+## Step 3 — Choose the flow
 
-Prompt (see `prompts.md`):
-- Where they differ, **pick one** and record an ADR with the loser under *Alternatives*.
-- Say which planner owns which depth ("keep B's screen-level UX, keep A's merge rigor").
-- Top section **"What came from where (A/B)"**.
-- **Never drop a whole section to hit a size budget — cut prose.**
-  *Case: the merge dropped "first tasks" and "executive summary"; no tasks were ever created.*
+| Flow | When | Steps |
+|---|---|---|
+| **Default** (measured) | always, unless below | merge → knock-down → dialog → close-out |
+| **Cross-read** (the requester's original method; unmeasured) | the requester asks for it, or the two angles barely overlap | each planner reads the other plan and appends what it lacks under "Adopted from X", changing nothing it already decided → A merges; every line of `diffs.md` becomes an ADR → knock-down → dialog → joint close-out |
 
-Variant (bidirectional): before the merge, each planner reads the other's plan
-and appends what it missed to its own; then merge. Costs one more round; use it
-when the angles are far apart.
+Never let two agents edit the same file. "Together" means turns in `dialog.md`.
 
-## Step 4 — Knock-down review
+## Step 4 — Merge (picks, never averages)
 
-The reviewer does **not** edit. It writes `review.md` with numbered findings:
-`B#N — [BLOCKING|IMPORTANT|MINOR] — section/ADR — what is wrong — concrete fix`.
+- Where the drafts differ, pick one and record an ADR; the loser goes under *Alternatives*.
+- Say which planner owns which depth ("keep B's screens, keep A's data rigor").
+- Top section: "What came from where (A/B)".
+- Size budget (default 60 KB): cut prose, **never drop a whole section**.
+  *(The merge dropped "first tasks"; no tasks were ever created.)*
 
-Hunt list (give it verbatim):
-- an MVP that cannot fit the deadline;
-- sections that contradict each other;
-- ADRs with no real decision, or whose decision depends on an open question;
-- clashes with the existing schema, vocabulary or prior plans;
-- missing lifecycle / merge / version / delete cases;
-- house-rule violations (DB thinness, security, stack);
-- depth lost from either draft, **especially the requester's #1 quality word**;
-- mockups that show buttons the phase cannot power;
-- every item from `plan-acceptance-gates` that is prose instead of a gate.
+## Step 5 — Knock-down review
 
-## Step 5 — Dialog
+B does **not** edit. `review.md`: `B#N — BLOCKING|IMPORTANT|MINOR — section/ADR — what is wrong — concrete fix`.
+Hunt list: in `prompts.md`. It includes every gate of `plan-acceptance-gates`
+that is still prose.
 
-The author answers every item in `dialog.md`:
-`B#N — ACCEPTED | PARTIAL | REJECTED — reason`, then edits the plan.
+## Step 6 — Dialog
 
-- The author **may argue back**, but a claim like "X does not exist" or "X exists"
-  needs a source (`path:line`, plan slug, doc URL) on either side.
-  *Case: two review claims were factually wrong; the author proved it and the
-  defended feature shipped exactly as planned.*
-- Reviewers never flip a **preference** question (language, tone, visual taste)
+A answers each item in `dialog.md`: `B#N — ACCEPTED|PARTIAL|REJECTED — reason`, then edits.
+- A may argue back; "X exists / does not exist" needs a source on either side.
+  *(Two review claims were wrong; the defended feature shipped as planned.)*
+- Reviewers never flip a **preference** question (language, tone, taste)
   without evidence of what the requester wants — keep both reasons in the question.
 
-## Step 6 — Close-out
+## Step 7 — Close-out
 
-Reviewer, resumed: reply to rebuttals (AGREE/DISAGREE), apply the smallest fix
-if still open, then a **consistency pass over the whole plan** — edits create
-new contradictions (*case: 5 new inconsistencies from the edits themselves*).
-End with `Final verdict: YES|NO` + at most 3 residual risks, and act on each risk
-(assign it, or turn it into a parallel task).
+B replies to rebuttals, applies the smallest open fix, runs a **consistency
+pass over the whole plan** (edits create new contradictions), runs
+`format-check.md`, and ends with `Draft verdict: YES|NO` + at most 3 risks.
+Joint close-out (cross-read flow): one extra turn each in `dialog.md`, at most
+one "more detail" round (see `complex-plan` stop rules).
 
-## Coordination rules
+The draft verdict closes phase 2 only. Phases 3–4 follow; the final verdict is
+in `plan-readiness-review`.
 
-- Files, not status: every step ends with a marker (`PLAN-DONE`, `MERGE-DONE`, `REVIEW-DONE`, `DIALOG-DONE`).
+## Coordination
+
+- Files, not status: markers `PLAN-DONE`, `CROSS-DONE`, `MERGE-DONE`, `REVIEW-DONE`, `DIALOG-DONE`; wait with `until grep -q <marker> <file>; do sleep 15; done`.
 - Replies capped at 3–5 lines.
-- Run a mechanical format check after every edit (ADR fields, question shape).
-- If the registry publish permission expires quickly, publish a v0 of the
-  context early and ask for the final publish only when the final body exists.
+- Publishing: see `plan-readiness-review`.

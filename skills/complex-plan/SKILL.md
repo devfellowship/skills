@@ -1,72 +1,70 @@
 ---
 name: complex-plan
-description: Use BEFORE writing a plan for large software work — a new app, a redesign, a mobile version, a cross-service pipeline, anything that will become 5+ PRs or be executed by other agents. Routes through the pack in a fixed order (ground truth → two-planner draft → acceptance gates → PR slicing → readiness review → execution handoff) and names the hard gates a plan must pass before it is published. Skip for a one-file bug fix, a question, or a plan that already exists and only needs a small edit.
+description: "Use BEFORE writing a plan for large software work — a new app, a redesign, a mobile version, a cross-service pipeline or integration, anything that will become 3+ PRs or be executed by other agents. Routes through the pack in a fixed order (ground truth → two-planner draft → acceptance gates → PR slicing → readiness review → execution handoff), names the file each phase produces and the hard gates a plan must pass before it is published. Skip for a one-file bug fix, a question, or a small edit to a plan that already exists."
 author: SamuelStefano
 tags: [planning, architecture, multi-agent, pack]
 ---
 
 # Complex plans that ship without bugs
 
-## Why this pack exists
-
-It was distilled from five real large plans and the bugs that came after them.
-The pattern was consistent:
-
-- **Facts about code were almost always right.** Audits with `file:line` held up.
-- **What broke was every gate written as prose.** Rollout, real-device checks,
-  measured limits, CI cost, shared-state isolation, "the person actually sees it".
-  When agents executed 30 PRs in 3 days, every gate that was not an automated
-  check or a named task was silently skipped.
-- **Review findings were found and then lost.** Reviewers predicted the two worst
-  bugs word for word; the plan turned them into one sentence with no PR.
-- **The best plan came from two blind planners + an adversarial review + a
-  dialog where the author could argue back.** 22 minutes, 20 decisions, 26
-  review findings applied, and the build followed it with zero parse warnings.
-
 **Core principle:** a plan is not done when it reads well. It is done when every
-promise in it is owned by a PR, a test, a question, or a named human with a date.
+promise in it is owned by a PR row, a test, a question, or a named human with a
+date. Why this pack exists, with the evidence: `why.md`.
+
+## Vocabulary (used the same way in every skill of the pack)
+
+- **PR row** — one line of the PR table (`templates/PR-TABLE.md`); the unit of delivery.
+- **Phase** — a group of PR rows with one acceptance; the unit of acceptance.
+- **Gate** — a check that can fail on its own: a test, a CI job, a screenshot a named person approves, or a PR row.
+- **Plan tracker** — wherever the plan is published (wiki, tracker, plan app). If none, the plan file in git.
 
 ## The route (do not skip or reorder)
 
-| # | Phase | Skill | Output |
+| # | Phase | Skill | Produces |
 |---|---|---|---|
-| 1 | Ground truth | `plan-ground-truth` | `sources/` on disk, coverage table, scope confirmed, live-state probe |
-| 2 | Draft | `plan-dual-draft` | `BRIEF.md` → `plan-A.md` + `plan-B.md` → `plan-merged.md` → `review.md` → `dialog.md` |
-| 3 | Gates | `plan-acceptance-gates` | acceptance that fires: running app, viewport matrix, rollout, shared state, human-visible outcome |
-| 4 | Slicing | `plan-slicing` | PR table with owners of shared artifacts, conflict map, merge/deploy order |
-| 5 | Readiness | `plan-readiness-review` | mechanical checklist passed, every finding owned, decisions posted as questions |
-| 6 | Handoff | `plan-execution-handoff` | executor briefs, merge policy, "done = seen running" |
+| 1 | Ground truth | `plan-ground-truth` | `sources/` (CONTEXT, audits, screenshots, PROBES, NOT-READ), `COVERAGE.md`, scope confirmed |
+| 2 | Draft | `plan-dual-draft` | `BRIEF.md` → `plan-A.md` + `plan-B.md` → `plan-merged.md` → `review.md` → `dialog.md` → **draft verdict** |
+| 3 | Gates | `plan-acceptance-gates` | acceptance per phase + `MATRIX.md`, edited **into `plan-merged.md`** |
+| 4 | Slicing | `plan-slicing` | the PR table as the `## Tasks` section of `plan-merged.md` |
+| 5 | Readiness | `plan-readiness-review` | one knock-down pass on what phases 3–4 added, then `READINESS.md` + **final verdict**; the passing body is copied to `PLAN.md` |
+| 6 | Handoff | `plan-execution-handoff` | one `EXECUTOR-BRIEF` per agent, `EXECUTION-LOG.md`, merge policy |
 
-Small plan (2–4 PRs, one repo, no UI)? Phases 1, 3, 5 are still mandatory. Phase 2
-can be a single planner + one adversarial reviewer.
+Phases 3–4 are edited by the planner who merged (resumed), and attacked once
+more in phase 5 by the reviewer who did not write them. Templates for every file:
+`templates/`.
 
-## Hard gates — the plan is NOT publishable while any is open
+**Small plan** (3–5 PRs, one repo): phases 1, 3, 4, 5 are still mandatory. Phase 2
+becomes one planner covering both angles + one knock-down reviewer
+(`plan-dual-draft/prompts.md`, "Single planner").
 
-1. Every primary source is on disk and mapped in a coverage table (nothing "from memory").
-2. Scope was confirmed with the requester, or one example was shown, before any fan-out.
-3. Every flag / second code path between the code and real users has a flip PR, owner, date and exit criterion.
-4. Every UI acceptance item names viewports **and** requires opening the built app with zero console errors.
-5. Every "unknown limit" (body size, rate limit, API shape, duration) is a Phase-0 measurement, not a risk row.
-6. Every shared artifact (component, store, token, hook, service worker, setting) has exactly one owner PR.
-7. Every review finding is a PR row, a question, or "won't do + consequence". Prose does not count.
-8. Every decision that belongs to someone else is a posted question with A/B/C and a recommendation — never answered by the planner.
-9. Every human gate (device test, design sign-off, secret, approval) has a name and a date, scheduled at the start, not at the end.
-10. Branch protection, CI duration and release gates in the repo docs were probed, and the merge path is written down.
+## Hard gates (checked line by line in `plan-readiness-review`)
+
+1. Sources on disk and mapped in `COVERAGE.md` — nothing from memory.
+2. Scope confirmed, or **one example** shown before any fan-out.
+3. Every flag / second code path has a flip PR row, owner, date, exit.
+4. Every phase is accepted on the running build (UI: production build, zero console errors, screenshot per band; pipeline: a row or log line with a correlation id on the production route).
+5. Every unknown limit is a Phase-0 measurement.
+6. Every shared artifact has exactly one owner PR row.
+7. Every review finding is a PR row, a question, or "won't do + consequence".
+8. Every decision owned by someone else is a posted question, not answered by the planner.
+9. Every human gate (device, design sign-off, secret, external config, approval) has a name and a date, scheduled first.
+10. Branch protection, CI duration and release gates in repo docs were probed; the merge path is written.
+
+**One example** = one filled artifact the requester can react to: an annotated
+screenshot of one screen, one section of `sources/CONTEXT.md`, or the first
+three rows of the PR table. A summary of intentions does not count.
 
 ## Stop rules
 
-- Planning is done when the final reviewer says **YES + at most 3 residual risks**, and each risk has an owner. Do not loop for polish.
-- If the requester has not seen anything yet, stop and show one example before spending on more agents.
+- The phase-2 YES only closes the draft. Planning is done when `READINESS.md`
+  says **YES + at most 3 residual risks, each with an owner**.
+- One "more detail" round is allowed, only for sections an executor could not
+  implement without guessing (no file path, no acceptance, no owner). A second
+  round needs the requester.
 - If a source could not be read, say so in the plan header. Never fill the gap with a guess.
 
-## Files this pack expects
+## Budget (so no phase eats the run)
 
-```
-<plan-dir>/
-  sources/            # transcripts, screenshots, design exports, code audits (phase 1)
-  COVERAGE.md         # source item → plan section | dropped because (phase 1)
-  BRIEF.md            # shared brief for both planners (phase 2)
-  plan-A.md plan-B.md plan-merged.md review.md dialog.md
-  PLAN.md             # the publishable body: decisions + criteria only
-  EXECUTION-LOG.md    # progress, never inside PLAN.md
-```
+Phase 1 ≤ 30 % of the effort, phase 2 ≤ 30 %, phases 3–5 ≤ 30 %. Plan body ≤ 60 KB.
+Heavy agents in parallel: as many as the machine's RAM allows, never more than 3
+by default.

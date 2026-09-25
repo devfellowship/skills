@@ -4,11 +4,11 @@
 
 ## 1. The ask (quoted)
 
-> "<exact words of the requester, including quality words like 'visually insane'>"
+> "<exact words of the requester, including quality words like 'visually stunning'>"
 
-Style / scope vetoes:
-- "<reference X is for content, not aesthetics>"
-- Out of scope unless stated: <list>
+- **Success =** <measurable outcome, e.g. "two people's trees merged and compared on Monday">.
+- Style / scope vetoes: "<reference X is for content, not aesthetics>".
+- Out of scope unless stated: <list>.
 
 ## 2. Required reading (and why)
 
@@ -16,39 +16,44 @@ Style / scope vetoes:
 |---|---|
 | `sources/CONTEXT.md` | sectioned requirements from the raw sources |
 | `sources/audit-*.md` | what exists today, with `path:line` — reuse it |
-| `<prior plan slug>` | must not contradict; do not invent a third vocabulary |
-| `<repo>/CLAUDE.md` or `AGENTS.md` | release gates, house rules |
+| `sources/PROBES.md` | branch protection, CI time, release gates, tools |
+| `<prior plan>` | must not contradict; no third vocabulary |
+| `<repo>/CLAUDE.md` / `AGENTS.md` | house rules and release gates |
 
-Repos are read-only. Read what you need, do not sweep everything.
+This brief may contain mistakes. If a source contradicts it, follow the source
+and cite `path:line`. Repos are read-only; read what you need, do not sweep.
 
 ## 3. Non-negotiable model
 
-<the domain model stated once, e.g. "capability → claim → task → evidence">.
-Disagree on design, never on this.
+<the domain model stated once, e.g. "order → line item → shipment">.
+If the model is unchanged by this plan, write "existing model — see
+`sources/audit-data.md`"; do not invent one. Disagree on design, never on this.
 
 ## 4. Cover every one of these
 
 1. Data model with real table/column names and volumes.
-2. Architecture with named libraries and versions.
-3. Screens / surfaces with states (empty, loading, error, long content), per viewport band.
-4. Rollout: how real users get it by default; every flag with owner, date, exit.
+2. Architecture with named libraries and versions; which repo/package owns each part.
+3. Screens / surfaces with states (empty, loading, error, long content) per band of `MATRIX.md`.
+4. Rollout: what a fresh user sees by default; every flag with owner, date, exit.
 5. Shared state touched (DB rows, stores, service worker, tokens, global CSS).
-6. Security and permissions per action.
-7. Phases, each with acceptance that can be checked on the running app.
-8. MVP by <date>: a floor (must ship) + an ordered "if time" list with fallbacks.
-   Keep the requester's #1 quality word inside the floor.
-9. Risks, with every unknown limit turned into a measurement.
-10. First tasks / PRs (never drop this section).
+6. Security: who can call each action; any grant to a public role has a threat line.
+7. Human consumers of every output (who, where they look, how it reaches them).
+8. Phases, each accepted on the running build.
+9. MVP by <date>: a floor + an ordered "if time" list with fallbacks. The
+   requester's #1 quality word stays inside the floor.
+10. Risks; every unknown limit becomes a measurement.
+11. First tasks / PR rows (never drop this section).
 
 ## 5. Output format
 
-- ADRs: `### ADR-N — Title`, fields **Context / Decision / Alternatives / Consequence**.
-- Open questions: `### Q-N — question`, options **A / B / C**, `Recommended: X` + why.
-- No inline diagrams unless the registry renders them; describe, then link.
+- ADR: `### ADR-N — Title` with **Context** / **Decision** / **Alternatives** / **Consequence**.
+- Question: `complex-plan/templates/QUESTION.md` (A/B/C, Recommended + why, Blocks, Decider).
+- No inline diagrams unless the plan tracker renders them.
 
 ## 6. Limits
 
 - No sub-agents, no code, no publishing.
-- Light exploration (shared RAM). Max <N> files per repo.
+- Light exploration: at most 40 files per repo.
+- Body ≤ 60 KB.
 - Last line of your file: `<!-- PLAN-DONE -->`.
-- Chat reply: 5 lines — the 5 decisions you are most confident in.
+- Chat reply: 5 lines — your 5 most confident decisions.
