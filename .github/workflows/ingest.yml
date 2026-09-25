@@ -4,9 +4,9 @@ name: Skills ingest + audit
 on:
   push:
     branches: [main]
-    paths: ["skills/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
+    paths: ["skills/**", "packs/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
   pull_request:
-    paths: ["skills/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
+    paths: ["skills/**", "packs/**", "scripts/**", "tests/**", ".claude-plugin/marketplace.json", ".github/CODEOWNERS", ".github/workflows/ingest.yml"]
   workflow_dispatch: {}
 
 jobs:
