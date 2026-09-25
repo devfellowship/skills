@@ -12,4 +12,5 @@
 | Finding ID | Severity | PR row / Q-N / won't do + consequence |
 |---|---|---|
 | B#4 | IMPORTANT | PR 7 (parser keeps ids; round-trip test) |
+| R#2 | BLOCKING | PR 11 (flip default flag; device gate named) |
 | P1 | BLOCKING | PR 12 (narrow desktop drawers) |

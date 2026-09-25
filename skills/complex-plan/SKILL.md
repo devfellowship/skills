@@ -24,7 +24,7 @@ date. Why this pack exists, with the evidence: `why.md`.
 |---|---|---|---|
 | 1 | Ground truth | `plan-ground-truth` | `sources/` (CONTEXT, audits, screenshots, PROBES, NOT-READ), `COVERAGE.md`, scope confirmed |
 | 2 | Draft | `plan-dual-draft` | `BRIEF.md` → `plan-A.md` + `plan-B.md` → `plan-merged.md` → `review.md` → `dialog.md` → **draft verdict** |
-| 3 | Gates | `plan-acceptance-gates` | acceptance per phase + `MATRIX.md`, edited **into `plan-merged.md`** |
+| 3 | Gates | `plan-acceptance-gates` | acceptance per phase edited **into `plan-merged.md`**; `MATRIX.md` (linked) |
 | 4 | Slicing | `plan-slicing` | the PR table as the `## Tasks` section of `plan-merged.md` |
 | 5 | Readiness | `plan-readiness-review` | one knock-down pass on what phases 3–4 added, then `READINESS.md` + **final verdict**; the passing body is copied to `PLAN.md` |
 | 6 | Handoff | `plan-execution-handoff` | one `EXECUTOR-BRIEF` per agent, `EXECUTION-LOG.md`, merge policy |
@@ -36,6 +36,19 @@ more in phase 5 by the reviewer who did not write them. Templates for every file
 **Small plan** (3–5 PRs, one repo): phases 1, 3, 4, 5 are mandatory; phase 6 whenever anyone other than the planner executes. Phase 2
 becomes one planner covering both angles + one knock-down reviewer
 (`plan-dual-draft/prompts.md`, "Single planner").
+
+## Files
+
+```
+<plan-dir>/
+  sources/  CONTEXT.md  audit-*.md  PROBES.md  NOT-READ.md  screenshots/
+  COVERAGE.md  BRIEF.md  diffs.md
+  plan-A.md  plan-B.md  plan-merged.md  review.md  dialog.md
+  MATRIX.md              # the file; plan-merged.md links to it, never copies it
+  review-2.md  dialog-2.md  READINESS.md
+  PLAN.md                # decisions + criteria + ## Tasks (the PR table)
+  briefs/<agent>.md  logs/PR-<n>.done  EXECUTION-LOG.md
+```
 
 ## Hard gates (checked line by line in `plan-readiness-review`)
 

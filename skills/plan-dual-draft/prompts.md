@@ -14,6 +14,13 @@ Same, file `plan-B.md`. Your angle: EXPERIENCE and VISUAL first — concrete
 screens per band, states, performance at <N> items, keyboard/touch, how <hard
 interaction> LOOKS. Still cover every section. Do NOT read `plan-A.md`.
 
+## Planner B, no-UI plans (pipelines, webhooks, data)
+
+Same, file `plan-B.md`. Your angle: CONSUMER and OPERATIONS first — the consumer
+table (`plan-acceptance-gates/non-ui-gates.md` §1), triggers and senders, failure
+modes, retries, secrets, test vs prod routing, observability. Still cover every
+section. Do NOT read `plan-A.md`.
+
 ## Single planner (small plans)
 
 Planner A prompt, with "cover BOTH angles: architecture/data AND

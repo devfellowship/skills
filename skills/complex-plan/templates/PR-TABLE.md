@@ -2,6 +2,7 @@
 
 | PR | Scope (§ refs + ADRs) | Owns shared artifacts | Depends on | Files touched | Done when (observed live) | Reviewer / merger | Blocked by | Lifecycle |
 |---|---|---|---|---|---|---|---|---|
+| 0.1 | Phase-0: measure upload body limit (§Risks) | — | — | — | number pasted in §Risks, yes/no branch chosen | planner | — | — |
 | 1 | §2.1, ADR-3 | `tokens.css`, `useHotkey` | — | `src/index.css`, `src/hooks/useHotkey.ts` | prod build at 390/1280, 0 console errors, screenshots | agent R / human M | Q-2 | C U |
 | 9 | §6 flip default | flag `ui.v2` (removal) | 1–8, device gate | `useUiVersion.ts` | fresh phone, empty storage, gets v2 | human M | device test (name, date) | D |
 

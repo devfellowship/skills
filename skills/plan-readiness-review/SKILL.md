@@ -16,7 +16,8 @@ to a tracker with no delete. Their holes were structural and checkable.)*
 ## Step 1 — Knock-down on phases 3–4
 
 The gates and PR table were added after the draft verdict. Run the knock-down
-prompt from `plan-dual-draft/prompts.md` once on those sections; apply via dialog.
+prompt from `plan-dual-draft/prompts.md` once on those sections, writing
+`review-2.md` / `dialog-2.md` with IDs `R#N` (never overwrite the phase-2 files).
 
 ## Step 2 — Checklist → `READINESS.md`
 
@@ -24,7 +25,7 @@ Template: `complex-plan/templates/READINESS.md`. Each line ✓/✗ + evidence.
 
 **Coverage**
 - [ ] `COVERAGE.md`: no source item without a section or `dropped because`.
-- [ ] Every review finding ID (draft **and** step 1) maps to a PR row, Q-N, or "won't do + consequence".
+- [ ] Every review finding ID (`B#N` from the draft, `R#N` from step 1) maps to a PR row, Q-N, or "won't do + consequence".
 - [ ] MVP = floor + ordered "if time" list, each with a fallback; the requester's #1 quality word is in the floor.
 
 **Decisions**
@@ -38,7 +39,7 @@ Template: `complex-plan/templates/READINESS.md`. Each line ✓/✗ + evidence.
 
 **Gates** (`plan-acceptance-gates`, `complex-plan` hard gates 3–10)
 - [ ] Flags: flip row, owner, date, exit. Test/temporary choices: promotion row.
-- [ ] Every phase accepted on the running build; every `MATRIX.md` row filled.
+- [ ] Every phase accepted on the running build; every `MATRIX.md` row filled, or MATRIX declared N/A with a reason (no UI).
 - [ ] Unknown limits measured in Phase 0.
 - [ ] Every output has a consumer, a place, a single sender.
 - [ ] Human gates and external manual steps named and dated, scheduled first.

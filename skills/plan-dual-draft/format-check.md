@@ -1,7 +1,7 @@
 # Mechanical format check (run after every edit)
 
 ```bash
-python3 format_check.py plan-merged.md   # or PLAN.md
+python3 <skills-dir>/plan-dual-draft/format_check.py plan-merged.md   # or PLAN.md
 ```
 
 It prints one line per finding and exits 1, or prints `ok`. It checks:

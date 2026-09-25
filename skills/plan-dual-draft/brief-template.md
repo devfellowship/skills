@@ -34,6 +34,7 @@ If the model is unchanged by this plan, write "existing model — see
 1. Data model with real table/column names and volumes.
 2. Architecture with named libraries and versions; which repo/package owns each part.
 3. Screens / surfaces with states (empty, loading, error, long content) per band of `MATRIX.md`.
+   No UI surface: write `MATRIX: N/A — <reason>` and fill the consumer table instead.
 4. Rollout: what a fresh user sees by default; every flag with owner, date, exit.
 5. Shared state touched (DB rows, stores, service worker, tokens, global CSS).
 6. Security: who can call each action; any grant to a public role has a threat line.

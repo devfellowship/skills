@@ -73,7 +73,7 @@ uses, asked of P. Verify as P, or get P's confirmation. Details: `non-ui-gates.m
 
 Every "limit unknown / API shape unknown / duration unknown" is a spike of at
 most 1 h with a yes/no branch, **before** dependent work; the number or the raw
-response is pasted into the plan. No schema before the raw API response.
+response is pasted into the plan. Each measurement is a `0.x` PR row. No schema before the raw API response.
 Check every constraint against measured durations ("deliver in 5 min" vs a
 5–8 min export). *(An unmeasured upload limit failed in production.)*
 

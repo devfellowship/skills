@@ -58,8 +58,9 @@ Check **integrate or buy** before listing any "build X" item.
 - Record **what already exists** ("already built — reuse, do not replan").
 - Every "keep X" / "X already works" cites the `path:line` that powers it.
   No citation = it is a build item. *(A "kept" AI button had no backend.)*
-- Screenshots of the current UI at the bands in `complex-plan/templates/MATRIX.md`
-  → `sources/screenshots/<band>-<screen>.png`.
+- UI plans: screenshots of the current UI at the bands in `complex-plan/templates/MATRIX.md`
+  → `sources/screenshots/<band>-<screen>.png`. Pipelines: screenshot the
+  consumer's actual view (board, channel) as they see it.
 
 ## Step 7 — Probe live state → `sources/PROBES.md`
 
