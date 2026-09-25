@@ -1,76 +1,69 @@
 ---
 name: plan-slicing
-description: Use when turning a large plan into PRs that several agents or people will build in parallel — assigns one owner PR per shared artifact, predicts file and behavior conflicts, adds sweep PRs for "everywhere" decisions, forbids temporarily unreachable features, and writes the merge and deploy order. Skip for a plan that is a single PR.
+description: "Use when turning a large plan into PRs that several agents or people will build in parallel — decides where code lives, assigns one owner PR per shared artifact, predicts file and behavior conflicts, adds sweep PRs for everywhere-decisions, forbids temporarily unreachable features, and writes the merge and deploy order into the PR table. Skip for a plan that is a single PR."
 author: SamuelStefano
 tags: [planning, pull-requests, parallel-work, architecture]
 ---
 
 # Slicing a plan into PRs
 
-## Overview
-
-Parallel PRs from the same base each quietly build their own copy of shared
-pieces, change a shared hook in two incompatible ways, or remove an entry point
-"until the next PR". In one redesign, 12 planned PRs became 16, a post-merge
-audit found about 10 gaps, and three separate copies of the same list shipped.
-
 **Core principle:** every shared thing has exactly one owner PR, and every PR
 leaves the product fully usable.
 
-## 1. Inventory shared artifacts first
+Output: the PR table (`complex-plan/templates/PR-TABLE.md`) as the `## Tasks`
+section of the plan; each row becomes one tracker task with an owner.
 
-Before cutting PRs, list everything more than one PR will touch: components,
-hooks, stores, design tokens, routes, settings keys, test fixtures, CI config.
-Each gets **one owner PR**; the others depend on it.
+*(Parallel PRs from one base built three copies of the same list; 12 planned PRs
+became 16; a post-merge audit found about 10 gaps.)*
 
-## 2. Cross-tree acceptance
+## 1. Where code lives
 
-When a PR changes a component another tree/platform also renders, its
-acceptance includes **that tree's rules** (permissions, recording guards, touch
-targets). *Case: reusing a desktop list on mobile dropped the mobile permission
-and recording guards — 6 blockers in one PR.*
+Before the first row, name the repo and package that owns each component.
+*(Five new repos, then a consolidation ordered by the lead.)*
 
-## 3. "Everywhere" decisions get a sweep PR
+## 2. Shared artifacts first
 
-"One style everywhere", "rename X", "replace component Y": a dedicated PR whose
-acceptance is a grep count (`0 imports of OldToggle`).
+List everything 2+ rows touch — components, hooks, stores, tokens, routes,
+settings keys, fixtures, CI config. One owner row each; the others depend on it.
 
-## 4. Never temporarily unreachable
+## 3. Cross-tree acceptance
 
-No slice removes an entry point before its replacement lands in the same or an
-earlier PR. *Case: a theme picker and a review tab were unreachable in
-production between stacked PRs.*
+A row that changes a component another tree/platform also renders carries that
+tree's rules (permissions, recording guards, touch targets) in its acceptance.
+*(Reusing a desktop list on mobile dropped its guards — 6 blockers.)*
 
-## 5. Conflict map
+## 4. Everywhere-decisions get a sweep row
 
-| Column | Example |
-|---|---|
-| Files touched per PR | `useHotkey.ts` in PR 6 and PR 7 |
-| Shared handler / behavior | hotkey table with a "shared handler" column |
-| Resolution | serialize, or name who resolves |
+"One style everywhere", "rename X": a row whose acceptance is a grep count
+(`0 imports of OldToggle`).
 
-Add tests that shortcuts do not fire mid-recording, inside text fields, or in
-menus. *Case: one shortcut both recorded and inserted a shape.*
+## 5. Never temporarily unreachable
 
-## 6. Blast radius of shared modules
+No row removes an entry point before its replacement lands in the same or an
+earlier row.
 
-When a shared component gains an import with side effects (a DB client, env
-access, a heavy library), list every test that renders it, or lazy-load. *Case:
-a module-level client import broke unrelated test files three times.*
+## 6. Conflict map (in the PR table)
 
-## 7. Order and gates
+Files touched per row; shared handlers (e.g. a hotkey table with a "shared
+handler" column); resolution = serialize or name who resolves. Add tests that
+shortcuts do not fire mid-recording, in text fields, or in menus.
 
-- Write the merge order and the deploy order across repos ("schema before API
-  before UI", "API must deploy before the site or it lists 0 items").
-- Name who approves each PR (probe branch protection first).
-- Keep a lifecycle column: create / update / move / delete / rotate for each
-  entity. *Case: a publish pipeline only upserted; moved items left orphan public rows.*
-- Classify each output artifact: public / internal / personal. *Case: internal
-  items were published to a public registry.*
-- Anything a root/router must call (a pack, a plugin list, a registry) needs the
-  root to **name** the member. Listing is not wiring.
+## 7. Blast radius of shared modules
 
-## 8. Run the coverage audit on the chained tip
+A shared component gaining a side-effect import (DB client, env, heavy library):
+list every test that renders it, or lazy-load. *(Broke unrelated tests 3 times.)*
 
-Before merging the stack, check out all PRs chained together and run the plan's
-coverage matrix plus the full test suite on that tip — not after merge.
+## 8. Order, owners, access
+
+- Merge and deploy order across repos ("API deploys before the site, or it lists 0 items").
+- Who reviews and who merges each row (probe branch protection first).
+- Lifecycle column filled for each entity (create / update / move / delete / rotate).
+- Any row that grants access (DB grant, row policy, token scope, public endpoint)
+  carries a threat line — see `plan-acceptance-gates/non-ui-gates.md` §4.
+- Any dispatcher (router, plugin list, cron, DI container, pack root) names the
+  new member in the same row; a listing test is the acceptance. Listing is not wiring.
+
+## 9. Audit the chained tip before merging
+
+Check out all rows chained together; run the coverage matrix and the full suite
+on that tip **before** merging the stack.

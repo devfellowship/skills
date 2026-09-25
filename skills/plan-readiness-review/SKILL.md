@@ -1,67 +1,75 @@
 ---
 name: plan-readiness-review
-description: Use right before publishing or handing off a large plan — a mechanical checklist that blocks publishing while any finding is unowned, any decision is answered by the planner instead of its owner, any section is used before it is defined, or the body mixes decisions with execution logs. Also use for each revision (v2, v3). Skip for chat-only sketches that will not be executed.
+description: "Use right before publishing or handing off a large plan, and for every revision — one knock-down pass on the sections added after the draft, then a mechanical checklist that blocks publishing while any finding is unowned, any decision was answered by the planner instead of its owner, anything is used before it is defined, or the body mixes decisions with execution logs. Produces READINESS.md with the final YES/NO. Skip for chat-only sketches that will not be executed."
 author: SamuelStefano
 tags: [planning, review, checklist, decisions]
 ---
 
-# Readiness review — publish only when this passes
+# Readiness review — the final verdict
 
-## Overview
+**Core principle:** readiness is a checklist run by B (who did not write phases
+3–4) or a fresh agent — never A. One ✗ blocks publishing.
 
-Plans in the source cases were published under time pressure (a publish
-permission about to expire), four times in one hour, to a registry with no
-delete. Their holes were structural and checkable: a section cited before it was
-defined, production scope printed after "out of scope", option labels written
-from memory, review findings reduced to one sentence.
+*(Plans were published under an expiring publish window, four times in one hour,
+to a tracker with no delete. Their holes were structural and checkable.)*
 
-**Core principle:** readiness is a checklist, not a feeling. Run every line; a
-single "no" blocks publishing.
+## Step 1 — Knock-down on phases 3–4
 
-## Checklist
+The gates and PR table were added after the draft verdict. Run the knock-down
+prompt from `plan-dual-draft/prompts.md` once on those sections, writing
+`review-2.md` / `dialog-2.md` with IDs `R#N` (never overwrite the phase-2 files).
+
+## Step 2 — Checklist → `READINESS.md`
+
+Template: `complex-plan/templates/READINESS.md`. Each line ✓/✗ + evidence.
 
 **Coverage**
-- [ ] `COVERAGE.md` has no source item without a section or a `dropped because`.
-- [ ] Every review finding ID appears in the coverage matrix as a PR row, a question, or "won't do + consequence".
-- [ ] The requester's #1 quality word is inside the MVP floor.
+- [ ] `COVERAGE.md`: no source item without a section or `dropped because`.
+- [ ] Every review finding ID (`B#N` from the draft, `R#N` from step 1) maps to a PR row, Q-N, or "won't do + consequence".
+- [ ] MVP = floor + ordered "if time" list, each with a fallback; the requester's #1 quality word is in the floor.
 
 **Decisions**
-- [ ] Every decision owned by someone else is a **posted question**, not an answer in the body: A/B/C, `Recommended`, why, and "blocks PR N".
-- [ ] The option space is complete (include the decider's likely view; a missing option gets "other" as the answer).
-- [ ] Option labels were read back from the registry after posting, not retyped.
-- [ ] No preference question was flipped by a reviewer without evidence.
-- [ ] Every user answer that overrides an ADR has already been applied to the body.
-- [ ] One representation per decision (question **or** body section, linked — not two copies that drift).
+- [ ] Every decision owned by someone else is a posted question (`templates/QUESTION.md`), not an answer in the body.
+- [ ] Option space complete, including the decider's likely view.
+- [ ] Labels read back from the plan tracker after posting (if there is one).
+- [ ] No answer came from the planner's own account minutes after posting.
+- [ ] No preference question flipped by a reviewer without evidence.
+- [ ] Every answer that overrides an ADR is applied to the body.
+- [ ] One representation per decision (question or body section, linked).
 
-**Gates** (from `plan-acceptance-gates`)
-- [ ] Every flag has a flip PR, owner, date, exit.
-- [ ] Every UI phase has viewport rows and "production build opened, zero console errors, screenshot".
-- [ ] Every unknown limit is a Phase-0 measurement.
-- [ ] Every human gate has a name and a date, scheduled first.
-- [ ] Every output consumed by a person names who sees it and where.
+**Gates** (`plan-acceptance-gates`, `complex-plan` hard gates 3–10)
+- [ ] Flags: flip row, owner, date, exit. Test/temporary choices: promotion row.
+- [ ] Every phase accepted on the running build; every `MATRIX.md` row filled, or MATRIX declared N/A with a reason (no UI).
+- [ ] Unknown limits measured in Phase 0.
+- [ ] Every output has a consumer, a place, a single sender.
+- [ ] Human gates and external manual steps named and dated, scheduled first.
+- [ ] Secrets table complete; no grant to a public role without a threat line.
 
 **Structure**
-- [ ] Nothing is referenced before it is defined.
-- [ ] Nothing in scope appears after "Out of scope".
-- [ ] Every block has **done when** (observable live) · **depends on** · **owner**.
-- [ ] Format passes a mechanical check (ADR fields present, question shape).
-- [ ] Header lists sources **not** read.
+- [ ] `format-check.md` from `plan-dual-draft` prints no finding.
+- [ ] Every PR row and phase has done-when (observed live) · depends-on · owner.
+- [ ] Header lists what was not read (`sources/NOT-READ.md`).
+- [ ] Body ≤ 60 KB (or a one-line reason); decisions and criteria only. Progress goes to `EXECUTION-LOG.md`.
+  *(A plan grew from 43 KB to 184 KB of logs; its own lead said "I don't know what's going on anymore".)*
 
 **Hygiene**
-- [ ] Body = decisions + criteria. Progress, journals and reviewer names go to `EXECUTION-LOG.md` or the task tracker. *Case: a plan grew from 43 KB to 184 KB of logs and stopped being usable; the TL said "I don't know what's going on anymore".*
-- [ ] Live state re-read right before publishing (PRs merged during planning).
-- [ ] Visibility and audience match the decider (not "personal" when a lead must answer).
-- [ ] Nothing personal or secret in a shared plan.
-- [ ] A "first tasks" section exists and tasks are created and linked to the plan.
+- [ ] Live state re-read just now (PRs merged while planning).
+- [ ] Every output artifact classified public / internal / personal; nothing internal or personal goes public.
+- [ ] Audience and visibility match the decider.
+- [ ] Tasks created from the PR table, linked to the plan, each with an owner.
+
+End: `Verdict: YES|NO` + at most 3 residual risks, each with an owner. On YES,
+copy the body to `PLAN.md`.
 
 ## Publishing
 
-- Draft and review locally. Open the publish window only for the final body.
-- After publishing, read the plan back through the registry API and confirm
-  owner, extracted decisions and question count.
+Draft and review locally; publish once, after YES. If the tracker has a
+time-limited publish permission, open it only then. Afterwards read the plan back
+through the tracker and confirm owner, extracted decisions and question count.
+No tracker: the plan file in git is the record.
 
-## Revision protocol
+## Revisions
 
-For each new version: re-run the coverage table against the **sources**, list
-"changed since vN", reconcile task statuses before rewriting, and turn every
-answered question into a task the same day.
+Re-run `plan-ground-truth` steps 3 and 7 against the sources, add
+`decided in vN → still valid today?`, list "changed since vN", reconcile task
+statuses before rewriting, and turn every answered question into a task the same day.

@@ -1,124 +1,100 @@
 ---
 name: plan-acceptance-gates
-description: Use when writing the acceptance criteria, rollout and risk sections of a large plan — turns every prose promise into a gate that fires: checks on the running build, a viewport × input × content matrix, a default-path and flag-exit rule, shared-state isolation, the human who must see the result, measured limits and real-device proof. Use it on a finished draft too, as the checklist a reviewer attacks. Skip for backend-only refactors with no users, flags or limits involved.
+description: "Use when writing the acceptance criteria, rollout and risk sections of a large plan, and as the checklist a reviewer attacks a finished draft with. Turns every prose promise into a gate that can fail on its own — checks on the running build, a viewport × input × content matrix, a default-path and flag-exit rule, shared-state isolation, the human who must see each output, measured limits, test hygiene and real-device proof. Pipelines, webhooks and integrations use non-ui-gates.md. Skip only for a pure refactor with no user-visible output, no flag, no limit and no shared state."
 author: SamuelStefano
 tags: [planning, acceptance-criteria, testing, rollout, mobile, responsive]
 ---
 
 # Acceptance gates that fire
 
-## Overview
+**Core principle:** in the source cases, code rules with a test survived; prose
+rules, human ceremonies and isolation claims did not. If a criterion cannot fail
+on its own, it is a wish. Give each one a place where it fails: a test, a CI job,
+a screenshot a named person approves, or a PR row.
 
-In the source cases, **code rules with a test survived; prose rules, human
-ceremonies and isolation claims did not.** "No text overlap", "44 px targets",
-"desktop untouched", "measure the upload limit", "test on a real iPhone",
-"remove the flag at the end" — each was written, each was skipped, each became
-a bug.
+Non-UI plans (jobs, webhooks, notifications, data, integrations): also `non-ui-gates.md`.
 
-**Core principle:** if a criterion cannot fail on its own, it is a wish. Give
-every criterion a place where it fails: a test, a CI check, a screenshot a named
-person approves, or a PR in the task list.
+## 1. Done = observed running
 
-## 1. "Done" means observed running
+Each phase's acceptance includes:
+- UI: the **production build** opened in a real browser, **zero console errors**,
+  a screenshot per band, on the tree real users get by default.
+- Pipeline: a row or log line with a correlation id, on the **production route**,
+  triggered once by the named human, and read at the real destination — never a
+  log that says "success".
 
-Every phase's acceptance includes:
-- the **production build** opened in a real browser, **zero console errors**,
-  screenshot attached (not dev server, not unit tests);
-- the URL / command that shows it, and on which tree real users get.
-
-*Case: unit tests and build were green while the live canvas was blank — the
-layout library crashed only in the production bundle. Nobody opened it.*
+*(Unit tests and build were green while the live canvas was blank: the layout
+library crashed only in the production bundle.)*
 
 ## 2. Default path and flags
 
-Answer in the plan: **what does a fresh user, empty storage, default settings,
-see now and after each phase?**
+State **what a fresh user with empty storage sees, now and after each phase.**
+Every flag, opt-in, `?param`, second tree or internal fallback ("if X missing,
+render legacy") needs: owner · date · metric · exit criterion · **flip PR row**.
+- Never build the next version on an unshipped flag.
+- Every "temporary" or "test" choice (channel, board, project, config) gets an
+  owner, a date and a promotion PR row; it blocks scaling to more users or repos.
 
-Every flag, opt-in, `?param`, second component tree or fallback branch needs:
-owner · date · metric/telemetry · exit criterion · **the flip PR in the task list**.
-- Never build the next version on top of an unshipped flag.
-- Internal fallbacks count ("if X missing, render legacy").
+*(30 PRs of a new mobile UI sat behind an opt-in flag whose removal was one
+sentence; phones kept the old UI.)*
 
-*Case: 30 PRs of a new mobile UI and a later redesign were all built behind an
-opt-in flag. "Delete the flag at the end" was one sentence with no PR. Phones
-in production kept the old UI mixed with new shared tokens.*
+## 3. Viewport × input × content — `complex-plan/templates/MATRIX.md`
 
-## 3. Viewport × input × content matrix
-
-One row per band; each row has a design frame, a rule, or "out of scope + what
-the user sees". **A missing row is a blocker.**
-
-| Band | Example | Input |
-|---|---|---|
-| Phone small / std / large | 360, 390, 430 portrait | touch |
-| Phone landscape | 844×390 | touch |
-| Tablet / narrow desktop | 768–1023 | touch **and** mouse |
-| Laptop | 1280×720, 1440×900 | mouse |
-| Desktop window resized narrow | 390 wide, mouse | mouse |
-
-- Map the app's **mode-selection logic** (UA, pointer, width, stored choice) onto
-  the table. *Case: the UI tree was chosen per tab by pointer type and cached;
-  a desktop window at 390 px got the desktop grid and broke.*
-- **Content stress**: longest real title, largest count, empty state, 0 items.
-  Say which control drops first at the smallest width. *Case: a short mock title
-  hid a header overflow; a real title covered undo/redo/export.*
-- Clamp every fixed design dimension for the smallest band (*a fixed 1040×760
-  modal overflowed a 768 px laptop*).
-- Turn every prose UI rule into an assertion per screen: touch ≥ 44 px, no
-  overlap, nothing clipped, focus visible.
-- Give the reviewer a recipe to see each band from a laptop (`?ui=mobile`, fresh tab).
+A missing row is a blocker. Also:
+- Map the app's **mode-selection logic** onto the bands (a desktop window at
+  390 px got the desktop grid and broke).
+- **Content stress**: e.g. the header fits at 360 px with a 60-character title;
+  0 items; 200 items. Say which control drops first.
+- Clamp every fixed design dimension for the smallest band (a 1040×760 modal
+  overflowed a 768 px laptop).
+- Every default a design mock shows is checked against the persisted default in
+  the data model; a mismatch is a question (a mock's 8 % safe area leaked into
+  landscape exports).
+- Every prose UI rule becomes an assertion per screen: touch ≥ 44 px, no overlap,
+  nothing clipped, focus visible.
 
 ## 4. Shared state isolation
 
-"Desktop is untouched" / "only mobile changes" must list the **shared state**, not
-just code paths: DB rows and settings, shared stores, service worker, manifest,
-CSP, global CSS/tokens, caches, feature flags, analytics.
-- A UI surface never writes persisted settings on open or on defaults.
-  Test: "open + cancel = no DB change". *Case: a mobile export sheet silently
-  enabled a watermark for the whole project, desktop included.*
-- Cross-cutting invariants get one named test in the **shared** layer ("an
-  unsaved take is never dropped"), not a sentence in one screen's section.
-- A service worker is a whole-origin change: plan update flow, stale tabs, desktop.
+"Only mobile changes" lists **shared state**: DB rows and settings, stores,
+service worker, manifest, CSP, global CSS/tokens, caches, flags.
+- A UI surface never writes persisted settings on open or on defaults. Test:
+  "open + cancel = no DB change" (a mobile sheet enabled a watermark project-wide).
+- Cross-cutting invariants get one test in the **shared** layer ("an unsaved take
+  is never dropped").
+- A service worker is whole-origin: plan update flow, stale tabs, desktop.
 
 ## 5. The human who must see it
 
-For any output a person consumes (notification, card, email, report, dashboard):
-**acceptance = "person P sees Y in place Z, once"**. Name where P actually looks.
-- Exactly one sender per notification; say which component sends and which must not.
-- Test data vs production routing is explicit: which board/channel/project in each.
-- Default ordering/priority puts new items where P will see them.
+For every output a person consumes: **"P sees Y in place Z without being told
+where"** — with the view, default filter, sort, channel and project P actually
+uses, asked of P. Verify as P, or get P's confirmation. Details: `non-ui-gates.md` §1.
 
-*Case: a pipeline worked end to end — the card was created, the message sent —
-but into a test board and channel the designer never opened, at the bottom of a
-priority-sorted list. He reported it as broken.*
+## 6. Unknowns → Phase-0 measurements
 
-## 6. Unknowns become Phase-0 measurements
+Every "limit unknown / API shape unknown / duration unknown" is a spike of at
+most 1 h with a yes/no branch, **before** dependent work; the number or the raw
+response is pasted into the plan. Each measurement is a `0.x` PR row. No schema before the raw API response.
+Check every constraint against measured durations ("deliver in 5 min" vs a
+5–8 min export). *(An unmeasured upload limit failed in production.)*
 
-Any "limit unknown", "API shape unknown", "duration unknown" is a **time-boxed
-spike with a yes/no branch** before dependent work, and the number goes into the plan.
-- No schema before the raw API response is pasted in the plan.
-- Check every constraint against measured durations (*"deliver in 5 min" vs a
-  5–8 min export*).
+## 7. Tests
 
-*Case: "request body limit unknown — measure with 50/100/200 MB" was a risk row;
-nobody measured; long uploads failed in production.*
+- Test preservation from minute zero: removing or weakening an assertion names
+  the behavior change.
+- A static selector audit is not e2e; run the real suite once per UI tree.
+- Map each stakeholder answer to the specs it breaks.
+- e2e budget: ≤ 15 min per PR or shard; path filters include shared components;
+  flake policy; settle helpers — never measure during an animation.
+- Test data against shared or production backends: namespaced prefix, deleted in
+  teardown, never in a consumer's queue or channel; name who sweeps leftovers.
+  *(e2e specs left 38 projects in a production account.)*
+- Async device/permission actions: latest wins, acquire before release, failure
+  never tears down working state. Sheets/dialogs: focus enters, is trapped, returns.
 
-## 7. Tests are part of acceptance
+## 8. Human gates are scheduled on day 1
 
-- Test preservation from minute zero: removing or weakening an assertion needs
-  the intended behavior change named in the PR. *Case: an agent deleted tests of
-  code it did not change; that hid a bug.*
-- A static selector audit is not e2e. Run the real suite at least once per UI tree.
-- Map each stakeholder answer to the specs it breaks (a debug-only badge broke 2 specs).
-- Budget e2e: max minutes per PR, sharding, path filters **including shared
-  components**, a flake policy, settle helpers for animations.
-- Async device/permission actions: latest wins, acquire before release, a failure
-  never tears down working state.
-- Sheets/dialogs: focus enters, is trapped, returns to the opener.
-
-## 8. Human gates are scheduled, not hoped for
-
-Real-device proof, design sign-off, secrets, approvals: named person + date,
-scheduled **on day 1**, and they **block the default flip**. Emulator tests cannot
-close a device criterion. Agents execute a week of PRs in a day — a gate "at the
-end of phase 3" never happens.
+Real-device proof, design sign-off, secrets, external manual config (OAuth
+redirect URIs, DNS, allow-lists, store review), approvals: a name and a date,
+scheduled first, **blocking the default flip**. Emulator tests cannot close a
+device criterion. Agents run a week of PRs in a day; a gate "at the end of phase
+3" never happens.

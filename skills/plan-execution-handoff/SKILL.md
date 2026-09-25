@@ -1,50 +1,66 @@
 ---
 name: plan-execution-handoff
-description: Use when a large plan is about to be executed by agents or people — writing executor briefs by section reference, setting the merge policy, the verification tools, the resource budget, and the definition of done (seen running on the tree real users get). Also use when resuming execution after a crash or handoff. Skip for executing a one-PR plan yourself.
+description: "Use when a large plan is about to be executed by agents or people, and when resuming execution after a crash or handoff — executor briefs by section reference, who merges, verification tools by path, resource budget, requester corrections mid-flight, and the definition of done (seen running on the path real users get). Skip for executing a one-PR plan yourself."
 author: SamuelStefano
 tags: [planning, execution, multi-agent, handoff, verification]
 ---
 
 # From plan to shipped
 
-## Overview
-
-Good plans still shipped bugs at the handoff: a builder merged its own PR 84
-seconds after opening it and deleted the branch the deploy pointed at; "Playwright
-unavailable" was accepted while it was installed next door; three sessions
-resumed the same handoff; a plan was marked done four hours before the requester
-found three bugs on a phone.
-
 **Core principle:** the executor brief carries the gates, not just the tasks.
 
-## Executor brief (one per agent)
+*(A builder merged its own PR 84 s after opening it and deleted the branch the
+deploy pointed at; "browser tool unavailable" was accepted while it was installed
+next door; three sessions resumed the same handoff; a plan was marked done four
+hours before three layout bugs were found on a phone.)*
 
-- **Scope by section reference**: "implement §2.1–2.2, §11 floor items a–c, ADRs 3, 7, 9". Two executors that share only a file-format section can work in parallel.
-- **"Open a PR. Do NOT merge."** Deploys track `main` only.
-- **Re-read the live plan and its ADRs before starting and before each PR.** *Case: a follow-up PR contradicted ADRs added after the executor's snapshot; it was closed with zero credit.*
-- **Tests**: never delete or weaken an assertion of code you did not change; name the behavior change when you do.
-- **Verification tools by path** (`<path>/node_modules/.bin/playwright`, the screenshot script, the device recipe). "Unavailable" is not a reason to skip; it is a blocker to report.
-- **No dead controls**: every visible button works or is not rendered.
-- **Resource budget**: max parallel heavy agents, where e2e and screenshots run, RAM limit. A step the brief forbids cannot be in the plan's acceptance.
-- **Commit WIP early**, one worktree per agent, a `.gitignore` committed before any agent starts.
-- **Coordinate through files** with done-markers; one named owner session per handoff.
+## Executor brief
+
+One per agent, from `complex-plan/templates/EXECUTOR-BRIEF.md`:
+- Scope by section reference ("§2.1–2.2, ADR-3, PR rows 4–5"). Two executors
+  sharing only a file-format section can run in parallel.
+- **Open a PR. Do NOT merge.**
+- Re-read the live plan and ADRs before starting and before each PR. *(A
+  follow-up PR contradicted ADRs added after the executor's snapshot; closed, zero credit.)*
+- Never delete or weaken an assertion of code you did not change.
+- Verification tools by path; a failing tool is a blocker to report, never a reason to skip.
+- No dead controls. Resource budget stated. A step the brief forbids cannot be in the acceptance.
+- Commit WIP early; one worktree per agent; `.gitignore` committed before any agent starts.
 
 ## Merge policy
 
-- Independent reviewer per PR before merge (post-merge review fixes cost extra PRs every time).
-- UI PRs are reviewed with a screenshot of the built app, not only the diff.
-- If a required suite is skipped ("merge with admin"), name what replaces it — e.g. one full e2e run on the chained tip.
-- A red covering suite blocks the stack; fix specs in the same PR that changes the UI.
+- The merger is named (orchestrator or a human) and is never the PR's author.
+  It merges only after an independent review; UI PRs with a screenshot of the built app.
+- Deploys track `main` only.
+- If a required suite is skipped, name its replacement (e.g. one full e2e run on the chained tip).
+- A red covering suite blocks the stack; fix specs in the PR that changed the UI.
+
+## During execution
+
+- Requester corrections go to `EXECUTION-LOG.md` → "Open corrections" at once,
+  until applied. *(A correction said in chat was lost when an incident took over.)*
+- A requester answer that overrides an ADR: edit the ADR in the live plan first,
+  then act. Executors follow the plan, not the chat.
+- Removing a capability: see `plan-acceptance-gates/non-ui-gates.md` §5.
+
+## Resuming after a crash or handoff
+
+1. Read the last 20 lines of `EXECUTION-LOG.md` and `git worktree list`.
+2. `gh pr list --state open` (or equivalent) vs the PR table.
+3. Re-read ADRs changed since the log's last date.
+4. Write yourself as the single owner session in the log before touching a branch.
 
 ## Definition of done
 
-- Production build, on the **default** path real users get, screenshot per viewport band.
-- For outputs people consume: the named person saw it in their place.
-- Deploys follow a runbook: DNS → verify it resolves → domain/certificate → deploy `main` → verify HTTPS 200. *Case: a domain created before its DNS record failed certificate issuance and the proxy never retried.*
-- Plan status moves to done only after the above, with the evidence linked.
+- Production build on the **default** path, screenshot per band; pipelines: the
+  named consumer saw the output in their place.
+- Deploy runbook: DNS → verify it resolves → domain/certificate → deploy `main`
+  → verify HTTPS 200. *(A domain created before its DNS record failed certificate
+  issuance; the proxy never retried.)*
+- Status moves to done only with that evidence linked.
 
 ## After shipping
 
-Write a short retro: symptom → cost → rule → which skill owns the rule. Feed it
-back into this pack. The fastest, cleanest plan in the source cases was fed by
-retros already written that way.
+Retro, one line per issue: symptom → cost → rule → which skill owns the rule.
+Feed it into your local copy of this pack, or a PR to its registry. The fastest
+clean plan in the source cases was fed by retros written that way.
