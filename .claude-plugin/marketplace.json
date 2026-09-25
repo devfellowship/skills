@@ -24,6 +24,41 @@
       "name": "test-driven-development",
       "source": "./skills/test-driven-development",
       "description": "Use when implementing any feature or bugfix, before writing implementation code"
+    },
+    {
+      "name": "complex-plan",
+      "source": "./skills/complex-plan",
+      "description": "Use BEFORE writing a plan for large software work — a new app, a redesign, a mobile version, a cross-service pipeline, anything that will become 5+ PRs or be executed by other agents. Routes through the pack in a fixed order (ground truth → two-planner draft → acceptance gates → PR slicing → readiness review → execution handoff) and names the hard gates a plan must pass before it is published. Skip for a one-file bug fix, a question, or a plan that already exists and only needs a small edit."
+    },
+    {
+      "name": "plan-ground-truth",
+      "source": "./skills/plan-ground-truth",
+      "description": "Use at the very start of a large plan, before any drafting — put every primary source on disk, confirm scope, resolve unknown terms, audit the code with file:line, screenshot the current product, and probe live state (branch protection, CI time, release gates, tools, credentials). Also use when revising a plan (v2, v3): the revision re-reads the sources, not the previous version. Skip for a plan whose sources are a single short message you can quote whole."
+    },
+    {
+      "name": "plan-dual-draft",
+      "source": "./skills/plan-dual-draft",
+      "description": "Use to draft a large plan with two independent planner agents — shared brief, blind drafts from different angles and models, a merge that picks instead of averaging, an adversarial review that tries to knock the plan down, a written dialog where the author may argue back, and a final consistency pass with a YES/NO verdict. Use after plan-ground-truth. Skip for a small plan (one planner plus one adversarial reviewer is enough) and for editing an existing plan."
+    },
+    {
+      "name": "plan-acceptance-gates",
+      "source": "./skills/plan-acceptance-gates",
+      "description": "Use when writing the acceptance criteria, rollout and risk sections of a large plan — turns every prose promise into a gate that fires: checks on the running build, a viewport × input × content matrix, a default-path and flag-exit rule, shared-state isolation, the human who must see the result, measured limits and real-device proof. Use it on a finished draft too, as the checklist a reviewer attacks. Skip for backend-only refactors with no users, flags or limits involved."
+    },
+    {
+      "name": "plan-slicing",
+      "source": "./skills/plan-slicing",
+      "description": "Use when turning a large plan into PRs that several agents or people will build in parallel — assigns one owner PR per shared artifact, predicts file and behavior conflicts, adds sweep PRs for \"everywhere\" decisions, forbids temporarily unreachable features, and writes the merge and deploy order. Skip for a plan that is a single PR."
+    },
+    {
+      "name": "plan-readiness-review",
+      "source": "./skills/plan-readiness-review",
+      "description": "Use right before publishing or handing off a large plan — a mechanical checklist that blocks publishing while any finding is unowned, any decision is answered by the planner instead of its owner, any section is used before it is defined, or the body mixes decisions with execution logs. Also use for each revision (v2, v3). Skip for chat-only sketches that will not be executed."
+    },
+    {
+      "name": "plan-execution-handoff",
+      "source": "./skills/plan-execution-handoff",
+      "description": "Use when a large plan is about to be executed by agents or people — writing executor briefs by section reference, setting the merge policy, the verification tools, the resource budget, and the definition of done (seen running on the tree real users get). Also use when resuming execution after a crash or handoff. Skip for executing a one-PR plan yourself."
     }
   ]
 }
