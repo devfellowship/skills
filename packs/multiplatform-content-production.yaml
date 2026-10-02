@@ -1,0 +1,27 @@
+# Transform one idea into channel-native, reviewed production instructions.
+# The root routes through the four specialist skills in order.
+schema: 1
+name: multiplatform-content-production
+title: Multiplatform content production
+description: >-
+  Transform an idea into distinct Instagram, TikTok, LinkedIn, Facebook and YouTube
+  content through strategy, platform-native copy, executable visual direction and an
+  evidence-based editorial review before production.
+root: content-orchestrator
+tags:
+  - content
+  - social-media
+  - copywriting
+  - visual-direction
+  - review
+members:
+  - slug: content-orchestrator
+    role: root
+  - slug: content-director
+    role: required
+  - slug: multiplatform-copywriter
+    role: required
+  - slug: visual-director
+    role: required
+  - slug: content-reviewer
+    role: required
