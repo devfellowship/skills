@@ -53,7 +53,7 @@ Template: `complex-plan/templates/READINESS.md`. Each line ✓/✗ + evidence.
   *(A plan grew from 43 KB to 184 KB of logs; its own lead said "I don't know what's going on anymore".)*
 
 **Hygiene**
-- [ ] Live state re-read just now (PRs merged while planning).
+- [ ] Live state re-read just now (PRs merged while planning); every new reader or writer of the data the plan changes has a PR row; the header names the commit the citations are true at.
 - [ ] Every output artifact classified public / internal / personal; nothing internal or personal goes public.
 - [ ] Audience and visibility match the decider.
 - [ ] Tasks created from the PR table, linked to the plan, each with an owner.
@@ -68,8 +68,40 @@ time-limited publish permission, open it only then. Afterwards read the plan bac
 through the tracker and confirm owner, extracted decisions and question count.
 No tracker: the plan file in git is the record.
 
+Before asking for a publish window:
+- **Count the writes** — body, appendices, one per question — and say the number.
+  *(A three-write window met a plan with eight questions; the body went out with
+  none of them.)*
+- Read how the tracker parses decisions (its docs or tool description), write the
+  ADR fields in that exact shape, and clear every `warn:` about field punctuation
+  before the first publish; then compare **extracted count with ADR count** on that
+  publish, before posting anything else.
+- Make one **read** against the tracker right before the first write. *(A
+  rate-limit error consumed one of three authorisations and published nothing.)*
+- A body that points to local files is unreadable to the decider. Publish the
+  appendices with it, or keep that content in the body. The size budget is for what
+  the decider reads; it is not a reason to move decisions out of their sight.
+  Going over 60 KB for this is a valid one-line reason.
+- Keep a copy of the body exactly as published (`PLAN-v<n>-published.md`).
+- Log every publish at once in `EXECUTION-LOG.md` (create it now): version, what
+  changed, any base hash the tracker wants on the next write, what is still only
+  local. *(Three publishes in one evening; the log was the only record of which
+  version the decider was reading.)*
+
 ## Revisions
 
 Re-run `plan-ground-truth` steps 3 and 7 against the sources, add
 `decided in vN → still valid today?`, list "changed since vN", reconcile task
 statuses before rewriting, and turn every answered question into a task the same day.
+
+**When the decider's review adds scope** (the common first revision): quote the
+request verbatim in `COVERAGE.md` and in the plan header; audit the code the new
+scope touches before writing a row; edit the body; then run one knock-down **on the
+diff against the published copy**, by an agent that did not write it, and apply it
+before republishing. New decisions inside the added scope are new questions. If
+the decider says a request is specific to this plan, it stays in this plan: do not
+copy it into a skill, template or retro rule.
+*(Three requests from the decider became two ADRs and seven rows; the knock-down on
+that diff alone returned 24 findings — a token leak through the test report, a
+false premise about which secrets existed, and a panel placed on the launch's
+critical path.)*

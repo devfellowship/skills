@@ -98,3 +98,17 @@ test("a reference used before its definition warns without failing", () => {
 	assert.equal(r.code, 0, r.out);
 	assert.match(r.out, /warn: line 2: ADR-1 used before its definition/);
 });
+
+test("an ADR field ending in a dot inside the bold is a warning, not a finding", () => {
+	const r = check(good.replace("**Decision:** d", "**Decision.** d"));
+	assert.equal(r.code, 0, r.out);
+	assert.match(r.out, /warn: .*ADR-1 .*\*\*Decision\.\*\*/);
+	assert.match(r.out, /ok/);
+});
+
+test("every dotted ADR field gets its own warning", () => {
+	const r = check(good.replace("**Context:** c", "**Context.** c").replace("**Decision:** d", "**Decision.** d"));
+	assert.equal(r.code, 0, r.out);
+	assert.match(r.out, /warn: .*\*\*Context\.\*\*/);
+	assert.match(r.out, /warn: .*\*\*Decision\.\*\*/);
+});

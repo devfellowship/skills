@@ -57,7 +57,12 @@ Hunt for:
 - acceptance written as prose instead of a check on the running build;
 - any flag without a flip PR; any shared artifact without an owner PR; any unknown limit not measured;
 - any output without a named human consumer and the place they look;
-- any decision the planner answered that belongs to someone else.
+- any decision the planner answered that belongs to someone else — including where a new screen goes inside an app the decider shaped, and where an output is delivered;
+- a new entity or state that no human can see without an agent or SQL;
+- an acceptance that needs an access, account or secret nobody checked exists;
+- a "green" that the suite reaches by skipping;
+- a row that ships schema and app code together when they deploy by different paths;
+- citations read at a commit older than the current default branch.
 Claims that something exists / does not exist need a source.
 End with `<!-- REVIEW-DONE -->`. Reply: counts per severity.
 

@@ -24,3 +24,23 @@ and every bug that came after them.
   opening the production build.
 
 The pack turns each of those into a gate with a place where it fails.
+
+## What an eighth plan added
+
+A content-versioning plan across four repos, run through the whole route:
+
+- **The two blind drafts agreed, and the agreement was the weak point.** A
+  red-team and two lens agents found three of the six findings that reshaped the
+  design.
+- **Every review round still paid.** 22, then 19, then 7, then 24 findings — 72,
+  of which 68 applied and 4 partly; the last 24 were on a revision of two
+  decisions and seven rows.
+- **The repo moved while the plan was written.** A merged PR added a reader of
+  the tables being changed; only the re-read before the readiness verdict saw it.
+- **Facts about access were the wrong ones.** Not the code: which secrets
+  existed, whether the suite ran or skipped, whether the database was reachable.
+- **The decider's first reply was scope the plan never asked about**: where a
+  human sees the new state. Publishing is the start of a review, not its end.
+- **Publishing itself failed twice**: the tracker extracted none of the decisions
+  from a format it did not parse, and the publish window was smaller than the
+  number of questions.

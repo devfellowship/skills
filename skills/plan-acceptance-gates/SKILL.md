@@ -26,6 +26,11 @@ Each phase's acceptance includes:
 *(Unit tests and build were green while the live canvas was blank: the layout
 library crashed only in the production bundle.)*
 
+Every acceptance names the **account and the access path** used to observe it. An
+access nobody has confirmed is a human gate with a name and a date, not a line of
+the criterion. *(A criterion required a login that was "not in the vault"; the
+accounts and their secrets had existed for two months.)*
+
 ## 2. Default path and flags
 
 State **what a fresh user with empty storage sees, now and after each phase.**
@@ -69,6 +74,13 @@ For every output a person consumes: **"P sees Y in place Z without being told
 where"** — with the view, default filter, sort, channel and project P actually
 uses, asked of P. Verify as P, or get P's confirmation. Details: `non-ui-gates.md` §1.
 
+**New state is an output.** For every entity or state the plan introduces (a
+version, a lock, a pin, a draft), name the screen where a person who operates the
+product sees it **without an agent, an MCP tool or SQL** — or write "no human
+surface" as a question for the decider. *(A plan versioned content across three
+repos and left the versions visible only through an agent tool. The decider's
+first review question was where the admin panel was.)*
+
 ## 6. Unknowns → Phase-0 measurements
 
 Every "limit unknown / API shape unknown / duration unknown" is a spike of at
@@ -85,6 +97,14 @@ Check every constraint against measured durations ("deliver in 5 min" vs a
 - Map each stakeholder answer to the specs it breaks.
 - e2e budget: ≤ 15 min per PR or shard; path filters include shared components;
   flake policy; settle helpers — never measure during an animation.
+- A run that skips is not green. Acceptance says **zero skips in the specs this
+  plan adds**, and one row owns declaring the credentials the suite needs. If the
+  whole suite is already red for unrelated reasons, a row adds a way to run one
+  spec, or no row can ever show green.
+- Test artifacts carry sessions. A trace archive records auth headers and stored
+  tokens; a search for the password does not see inside it. Turn traces off for
+  uploaded reports or keep them out of the upload, and accept on a search for
+  token strings, not for the password.
 - Test data against shared or production backends: namespaced prefix, deleted in
   teardown, never in a consumer's queue or channel; name who sweeps leftovers.
   *(e2e specs left 38 projects in a production account.)*

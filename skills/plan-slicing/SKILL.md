@@ -25,6 +25,8 @@ Before the first row, name the repo and package that owns each component.
 
 List everything 2+ rows touch — components, hooks, stores, tokens, routes,
 settings keys, fixtures, CI config. One owner row each; the others depend on it.
+The owner is the **earliest** row in merge order that edits it. *(A seed file was
+owned by a phase-2 row while a phase-1 row edited it first.)*
 
 ## 3. Cross-tree acceptance
 
@@ -56,6 +58,13 @@ list every test that renders it, or lazy-load. *(Broke unrelated tests 3 times.)
 ## 8. Order, owners, access
 
 - Merge and deploy order across repos ("API deploys before the site, or it lists 0 items").
+- Schema and app code that deploy by different paths never share a row: schema
+  row → confirm it is applied → code row. *(The rule was written in the plan and
+  one row still bundled a migration with UI code.)*
+- Scope added in review joins the phase it belongs to but stays **off the critical
+  path** of what the requester is waiting for, unless that thing depends on it.
+  *(An admin panel and its tests were first placed in front of the launch they had
+  nothing to do with.)*
 - Who reviews and who merges each row (probe branch protection first).
 - Lifecycle column filled for each entity (create / update / move / delete / rotate).
 - Any row that grants access (DB grant, row policy, token scope, public endpoint)

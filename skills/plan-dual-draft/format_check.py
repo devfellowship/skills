@@ -5,6 +5,7 @@ Prints one line per finding and exits 1 when there is any; prints "ok" and exits
 Checks: ADR fields, question fields, headings after "Out of scope", ADR-N / Q-N referenced
 but never defined, and the sentinel line when the file is a draft. References used before their
 definition are printed as "warn:" lines (plans often list ADRs at the end); they do not fail.
+So are ADR fields written "**Decision.**" instead of "**Decision:**".
 """
 import re
 import sys
@@ -56,6 +57,11 @@ def main(path):
             if not has_field(body, names):
                 findings.append(f"line {ln}: {head[:60]} — missing **{f}")
 
+    dotted = []
+    for ln, head, body in blocks(lines, "ADR-"):
+        for m in re.finditer(r"\*\*(Context|Decision|Alternatives|Consequences?|Contexto|Decis[ãa]o|Alternativas|Consequ[êe]ncias?)\.\*\*", body):
+            dotted.append(f"warn: line {ln}: {head[:60]} — field written **{m.group(1)}.**; a tracker that extracts decisions may match only **{m.group(1)}:**")
+
     oos = next((i for i, l in enumerate(lines) if re.match(r"^#{2,6}\s+.*out of scope", l, re.I)), None)
     if oos is not None:
         for i in range(oos + 1, len(lines)):
@@ -85,7 +91,7 @@ def main(path):
     if re.search(r"plan-[AB]\.md|plan-merged\.md", path) and "-DONE -->" not in (lines[-1] if lines else ""):
         findings.append("last line: sentinel <!-- …-DONE --> missing")
 
-    for f in findings + warnings:
+    for f in findings + dotted + warnings:
         print(f)
     if not findings:
         print("ok")
