@@ -18,10 +18,12 @@
 | `sources/audit-*.md` | what exists today, with `path:line` — reuse it |
 | `sources/PROBES.md` | branch protection, CI time, release gates, tools |
 | `<prior plan>` | must not contradict; no third vocabulary |
-| `<repo>/CLAUDE.md` / `AGENTS.md` | house rules and release gates |
+| `<repo>/CLAUDE.md` / `AGENTS.md` (every repo a PR row may touch) | house rules and release gates |
+| `<the real pending change>` | the test case your design must survive (see `plan-ground-truth` step 6) |
 
 This brief may contain mistakes. If a source contradicts it, follow the source
-and cite `path:line`. Repos are read-only; read what you need, do not sweep.
+and cite `path:line`. Repos are read-only; read what you need, do not sweep. Repos were read at
+commits `<repo@sha, …>`; cite `path:line` at those commits.
 
 ## 3. Non-negotiable model
 

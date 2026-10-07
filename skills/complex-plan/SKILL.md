@@ -45,6 +45,7 @@ becomes one planner covering both angles + one knock-down reviewer
   COVERAGE.md  BRIEF.md  diffs.md
   plan-A.md  plan-B.md  plan-merged.md  review.md  dialog.md
   MATRIX.md              # the file; plan-merged.md links to it, never copies it
+  decision-record.md     # only when the two drafts agree (plan-dual-draft step 3b)
   review-2.md  dialog-2.md  READINESS.md
   PLAN.md                # decisions + criteria + ## Tasks (the PR table)
   briefs/<agent>.md  logs/PR-<n>.done  EXECUTION-LOG.md
@@ -75,9 +76,12 @@ three rows of the PR table. A summary of intentions does not count.
   implement without guessing (no file path, no acceptance, no owner). A second
   round needs the requester.
 - If a source could not be read, say so in the plan header. Never fill the gap with a guess.
+- After the first publish, expect one revision from the decider's review
+  (`plan-readiness-review` → Revisions): keep the 10 % of effort the Budget leaves
+  free for it.
 
 ## Budget (so no phase eats the run)
 
-Phase 1 ≤ 30 % of the effort, phase 2 ≤ 30 %, phases 3–5 ≤ 30 %. Plan body ≤ 60 KB by default; going over needs one line of reason in `READINESS.md`.
+Phase 1 ≤ 30 % of the effort, phase 2 ≤ 30 %, phases 3–5 ≤ 30 %. Plan body ≤ 60 KB by default; going over needs one line of reason in `READINESS.md`. The merged draft takes at most three quarters of the 60 KB; gates and slicing fill the rest. A revision after the decider's review can add a quarter more (one run: 59 → 74 KB) — give the reason line then.
 Heavy agents in parallel: as many as the machine's RAM allows, never more than 3
 by default.

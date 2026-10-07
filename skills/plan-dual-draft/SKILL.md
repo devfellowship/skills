@@ -42,10 +42,24 @@ both replies to `diffs.md` — the disagreement list, on record before any excha
 
 | Flow | When | Steps |
 |---|---|---|
-| **Default** (measured) | always, unless below | merge → knock-down → dialog → close-out |
+| **Default** (measured) | always, unless below | 3b if the drafts agree → merge → knock-down → dialog → close-out |
 | **Cross-read** (the requester's original method; **unmeasured** — record whether its disagreements survived to ADRs) | the requester asks for it, or the two angles barely overlap | each planner reads the other plan and appends what it lacks under "Adopted from X", changing nothing it already decided → A merges; every line of `diffs.md` becomes an ADR → knock-down → dialog → joint close-out |
 
 Never let two agents edit the same file. "Together" means turns in `dialog.md`.
+
+## Step 3b — When the drafts agree, attack the agreement
+
+Two drafts choosing the same architecture is not confirmation; it is one shared
+premise. Before the merge, give the choice to a red-team whose only job is to make
+the best case for the alternative, plus one lens per risk the angles did not cover
+(schema and security; the person who authors or operates it) — at most 3 agents.
+The orchestrator checks every disputed fact in the code and writes
+`decision-record.md` (locked facts, final decisions, dissent), ending
+`<!-- DR-DONE -->`; the merge treats it as binding.
+Trigger: `diffs.md` shows the same top-level choice in both replies.
+*(Both planners picked the same architecture. A red-team and two lens agents then
+showed a draft could leak through an anonymous endpoint, a seeder would rewrite the
+published copy, and both drafts' enrolment rules were wrong in opposite directions.)*
 
 ## Step 4 — Merge (picks, never averages)
 
@@ -54,6 +68,9 @@ Never let two agents edit the same file. "Together" means turns in `dialog.md`.
 - Top section: "What came from where (A/B)".
 - Size budget (default 60 KB): cut prose, **never drop a whole section**.
   *(The merge dropped "first tasks"; no tasks were ever created.)*
+- The merge takes at most **three quarters** of the budget. Gates and slicing add
+  the rest. *(A 52 KB merge became 68 KB after phases 3–4 and was trimmed while a
+  reviewer was already reading it.)*
 
 ## Step 5 — Knock-down review
 
@@ -83,5 +100,12 @@ in `plan-readiness-review`.
 ## Coordination
 
 - Files, not status: markers `PLAN-DONE`, `CROSS-DONE`, `MERGE-DONE`, `REVIEW-DONE`, `DIALOG-DONE`; wait with `until grep -q <marker> <file>; do sleep 15; done`.
+- The marker is the agent's **last** write: no edit after it. An agent that trims
+  or condenses afterwards removes the marker first and writes it again at the end.
+  *(A reviewer read the file at 68 KB while its author was cutting it to 61 KB;
+  every finding had to be re-checked against the file on disk.)*
+- After resuming an agent, confirm its output file appears; a message that arrives
+  while it is still closing a turn may never be picked up — send it again.
+- Tell every reviewer which commit the plan's citations were read at.
 - Replies capped at 3–5 lines.
 - Publishing: see `plan-readiness-review`.

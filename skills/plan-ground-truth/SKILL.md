@@ -58,6 +58,15 @@ Check **integrate or buy** before listing any "build X" item.
 - Record **what already exists** ("already built — reuse, do not replan").
 - Every "keep X" / "X already works" cites the `path:line` that powers it.
   No citation = it is a build item. *(A "kept" AI button had no backend.)*
+- Write down the **commit of every repo you read** and put it in the plan header:
+  line numbers are only true at that commit. *(A PR merged while the plan was
+  being drafted added a new reader of the very tables the plan changes; the line
+  numbers of the plan's most-cited file had shifted.)*
+- Find one **real pending change** of the kind the plan must survive (a held
+  content update, a queued migration, a half-done refactor) and hand it to the
+  planners as the test case. *(The brief did not name a ready, on-hold content
+  package that inserts items mid-list; combined with one draft's edit rule it would
+  have rewritten published content.)*
 - UI plans: screenshots of the current UI at the bands in `complex-plan/templates/MATRIX.md`
   → `sources/screenshots/<band>-<screen>.png`. Pipelines: screenshot the
   consumer's actual view (board, channel) as they see it.
@@ -69,13 +78,19 @@ One row per probe: `probe | result | command/source | date`.
 | Probe | Why it bit |
 |---|---|
 | Branch protection, required reviews, code owners | Merges stalled 2h40 at the end; then "skip CI" removed the only e2e gate |
-| Repo rule files (`CLAUDE.md`, `AGENTS.md`, ADRs, specs) for release gates | A rule required physical-device proof before the new tree became default; nobody read it, so no device gate was scheduled and the flag never flipped |
+| Repo rule files (`CLAUDE.md`, `AGENTS.md`, ADRs, specs) for release gates — **in every repo a PR row will touch**, not only the main one | A rule required physical-device proof before the new tree became default; nobody read it, so no device gate was scheduled and the flag never flipped. A secondary repo's UI-language and routing rules surfaced only in the third review |
 | CI duration of the suites the plan extends | Mobile e2e grew to 45–50 min/PR and was ignored |
 | Tools, MCPs, credentials the plan needs, and who owns them | A diagram tool was disconnected; a DNS token lived in a personal vault |
+| Test accounts and CI secrets: **list them through the API**, and read the last run of the suite the plan extends — how many tests ran, how many skipped | A plan scheduled "create the test secrets"; they had existed for two months. The workflow never declared them, so every spec that needed a login skipped (20 skips in the last run) and nobody had read the count |
+| Every database or service the plan must measure: can you reach it **with a validated target** today? | The planner's token did not reach the project; the database measurements moved to Phase 0 with an owner instead of being guessed |
 | Deploy topology: which branch deploys, restart behavior, caches | A merged feature did not appear: the server restarts only when idle |
 | Protections the design relies on (row-level security, rulesets) — via API | Twice assumed on, twice found off |
 | Existing plans and ADRs on the topic | Avoids a third vocabulary; lets the author refute wrong review claims |
 | Where each human consumer actually looks (view, filter, sort, channel) — ask them | A working pipeline delivered into a board and channel the consumer never opened |
+
+Repeat the last probe before **each review** and before publishing:
+`git log <commit you read>..origin/main -- <paths the plan touches>`. A new reader
+or writer of the data you are changing is a missing PR row.
 
 ## Step 8 — `sources/NOT-READ.md`
 

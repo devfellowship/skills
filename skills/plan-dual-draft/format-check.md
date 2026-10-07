@@ -10,8 +10,9 @@ It prints one line per finding and exits 1, or prints `ok`. It checks:
 2. Every `### Q-N` block has **A.**/**A)**, **B.**/**B)**, **Recommended:**, **Blocks:**, **Decider:**.
 3. No heading of any level after "Out of scope" (appendix/changelog excepted).
 4. Every `ADR-N` / `Q-N` referenced is defined somewhere.
-6. `warn:` lines (do not fail): an `ADR-N` / `Q-N` used before its definition, outside the provenance/summary section. Read each one: a forward pointer to an ADR list at the end is fine; a scope block that depends on something defined later is a structure bug.
 5. Draft files (`plan-A/B/merged.md`) end with their `<!-- …-DONE -->` sentinel.
+6. `warn:` lines (do not fail): an `ADR-N` / `Q-N` used before its definition, outside the provenance/summary section. Read each one: a forward pointer to an ADR list at the end is fine; a scope block that depends on something defined later is a structure bug.
+7. `warn:` (does not fail): an ADR field written `**Decision.**`. A plan tracker that extracts decisions may match only `**Decision:**` — colon inside the bold. *(A tracker extracted 0 of 14 decisions and one false one from a numbered heading; fixing it cost a second publish.)*
 
 Plans written before `QUESTION.md` existed fail on **Blocks** / **Decider**: add the two fields, do not loosen the script.
 
