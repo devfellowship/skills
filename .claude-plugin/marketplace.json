@@ -16,6 +16,31 @@
       "description": "Analyze collected Campaigns post metrics for one social account. Use for weekly performance reports, retrospective rankings, or evidence-based content experiments. Do not use to publish content, schedule reports, or claim causation."
     },
     {
+      "name": "content-orchestrator",
+      "source": "./skills/content-orchestrator",
+      "description": "Use para conduzir uma ideia até um pacote de produção multiplataforma, coordenando estratégia, copy, direção visual e revisão na ordem correta. Não use para uma tarefa isolada de legenda, arte, análise de métricas ou publicação sem autorização."
+    },
+    {
+      "name": "content-director",
+      "source": "./skills/content-director",
+      "description": "Use para transformar uma ideia, produto, história ou opinião em uma estratégia e um plano de conteúdo distintos para Instagram, TikTok, LinkedIn, Facebook e YouTube. Não use para apenas lapidar uma copy já aprovada, detalhar somente a direção visual ou revisar uma peça pronta."
+    },
+    {
+      "name": "multiplatform-copywriter",
+      "source": "./skills/multiplatform-copywriter",
+      "description": "Use para escrever ou reescrever hooks, headlines, roteiros, legendas, CTAs e textos finais adaptados a Instagram, TikTok, LinkedIn, Facebook e YouTube a partir de uma ideia ou estratégia aprovada. Não use para definir a campanha inteira, dirigir composição visual ou fazer a revisão final independente."
+    },
+    {
+      "name": "visual-director",
+      "source": "./skills/visual-director",
+      "description": "Use depois que conceito, roteiro e copy estiverem definidos para transformar carrosséis, posts, thumbnails e vídeos sociais em direção visual executável por designer ou IA. Não use para redefinir estratégia, reescrever a mensagem principal ou gerar um plano editorial do zero."
+    },
+    {
+      "name": "content-reviewer",
+      "source": "./skills/content-reviewer",
+      "description": "Use para revisar criticamente roteiro, carrossel, post, vídeo, legenda, thumbnail ou campanha antes de produção ou publicação, com severidade, nota justificada e versão corrigida. Não use como primeira etapa para criar estratégia nem como aprovação factual sem fontes."
+    },
+    {
       "name": "storybook-design-pr",
       "source": "./skills/storybook-design-pr",
       "description": "Use quando a mudança tocar arquivo de story, playground ou protótipo (`*.stories.*`) e for virar Pull Request — qualquer alteração de cor, espaçamento, tipografia, layout ou texto visível. Produz o card que avisa o designer e um corpo de PR com o porquê e o antes/depois. Abrir a PR sozinha não avisa ninguém. Não use em mudança só de lógica, sem efeito visual."
